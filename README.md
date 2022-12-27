@@ -1,3 +1,3 @@
 # git-project
-this is first project
+this is automation project
 demo project
