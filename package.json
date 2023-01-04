@@ -24,6 +24,10 @@
     "csv-writer": "^1.6.0",
     "csvtojson": "^2.0.10",
     "cypress": "^12.2.0",
+    "cypress-downloadfile": "^1.2.3",
     "puppeteer": "^19.4.1"
+  },
+  "devDependencies": {
+    "cypress-file-upload": "^5.0.8"
   }
 }
