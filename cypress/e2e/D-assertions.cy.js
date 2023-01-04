@@ -35,17 +35,55 @@ describe('Assertions Demo', () => {
 
     });
 
-    it('Explicit Assertions Demo', () => {
+    it('Implicit Assertions Demo', () => {
 
-        cy.visit('https://www.doubtnut.com')
-        cy.get(".HomeCarouselStyles__topHeader-bcUNXV")
-        .find('.HomeCarouselStyles__Title-fEDioy')
-        .eq(0)
-        .invoke('text')
-        .then((text) => {
-            expect(text.trim()).equal('NCERT')
-        })
+        cy.visit('https://opensource-demo.orangehrmlive.com/')
+        cy.get("input[placeholder='Username']").type('Admin')
+        cy.get("input[placeholder='Username']").should('have.value','Admin')
+        cy.get("input[placeholder='Password']").type('admin123')
+        cy.get("button[type='submit']").click()
+        
     });
 
+    it('Implicit Assertions Demo', () => {
 
+        cy.visit('https://opensource-demo.orangehrmlive.com/')
+
+        cy.url().should('include','orangehrmlive.com')
+        .should('contain','orange')
+        .and('not.contain','green')
+
+        cy.title().should('include','Orange')
+        .and('eq','OrangeHRM')
+        .and('contain','HRM')
+        
+    });
+
+    it('Explicit Assertions Demo', () => {
+
+        // cy.visit('https://www.doubtnut.com')
+        // cy.get(".HomeCarouselStyles__topHeader-bcUNXV")
+        // .find('.HomeCarouselStyles__Title-fEDioy')
+        // .eq(0)
+        // .invoke('text')
+        // .then((text) => {
+        //     expect(text.trim()).equal('NCERT')
+        // })
+
+        cy.visit('https://opensource-demo.orangehrmlive.com/')
+        cy.get("input[placeholder='Username']").type('Admin')
+        cy.get("input[placeholder='Password']").type('admin123')
+        cy.get("button[type='submit']").click()
+
+        let expName = 'anu PV'
+        cy.get(".oxd-userdropdown-name").then((e)=>{
+
+            let actName = e.text()
+            // BDD assertion
+            expect(actName).to.equal(expName)
+            //TDD assertion
+            assert.notEqual(actName,expName)
+        })
+
+    });
 })
