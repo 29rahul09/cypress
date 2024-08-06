@@ -1,0 +1,80 @@
+const issueAandVol = [
+  "https://neurologyopen.bmj.com/content/6/2",
+  "https://neurologyopen.bmj.com/content/6/1",
+  "https://neurologyopen.bmj.com/content/5/2",
+  "https://neurologyopen.bmj.com/content/5/1",
+  "https://neurologyopen.bmj.com/content/4/2",
+  "https://neurologyopen.bmj.com/content/4/1",
+  "https://neurologyopen.bmj.com/content/3/2",
+  "https://neurologyopen.bmj.com/content/3/1",
+  "https://neurologyopen.bmj.com/content/2/2",
+  "https://neurologyopen.bmj.com/content/2/1",
+  "https://neurologyopen.bmj.com/content/1/1",
+ 
+];
+const journal = "neurologyopen";
+const domain = "https://neurologyopen.bmj.com";
+const articleUrlId = `cypress/fixtures/${journal}.json`;
+const pdfImageId = `cypress/downloads/${journal}/pdfImage.csv`;
+
+describe("Article Page Sections", () => {
+  // Test to fetch article URLs
+  it.only("Find Article URL", () => {
+    const articleUrls = [];
+
+    issueAandVol.forEach((page) => {
+      cy.visit(page, { failOnStatusCode: false });
+
+      cy.get(".issue-toc")
+        .find("a")
+        .each(($ele) => {
+          articleUrls.push($ele.attr("href"));
+        })
+        .then(() => {
+          cy.writeFile(articleUrlId, articleUrls);
+        });
+    });
+  });
+
+  // Check article page response
+  it("Find Article Page Response", () => {
+    // Read article URLs from JSON file
+    cy.fixture(`${journal}.json`).then((data) => {
+      // Visit each article page and check for specific image pdfImage
+      data.forEach((page) => {
+        cy.visit(`${domain}${page}`, { failOnStatusCode: false });
+
+        cy.request(`${domain}${page}`, { failOnStatusCode: false }).then(
+          (response) => {
+            expect(response.status).to.eq(200);
+          }
+        );
+      });
+    });
+  });
+
+  // Test to find articles with specific image pdfImage
+  it("Find the article have image with source info", () => {
+    const pdfImage = [];
+
+    // Read article URLs from JSON file
+    cy.fixture(`${journal}.json`).then((data) => {
+      // Visit each article page and check for specific image pdfImage
+      data.forEach((page) => {
+        cy.visit(`${domain}${page}`, { failOnStatusCode: false });
+
+        cy.get("body").then(($body) => {
+          if ($body.find("#cboxLoadedContent").length > 0) {
+            pdfImage.push(page);
+          }
+        });
+      });
+
+      // Write results to CSV file
+      cy.writeFile(pdfImageId, pdfImage);
+    });
+  });
+
+
+  
+});

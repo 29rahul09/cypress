@@ -26,26 +26,28 @@ Cypress.on("uncaught:exception", (err, runnable) => {
   return false;
 });
 
-beforeEach( function() {
-  window.logCalls = 1;
-  window.testFlow = [];
-});
+// beforeEach( function() {
+//   window.logCalls = 1;
+//   window.testFlow = [];
+// });
 
-Cypress.Commands.overwrite('log', (...args) => {
+// Cypress.Commands.overwrite('log', (...args) => {
 
-  const msg = args[1];
+//   const msg = args[1];
 
-  Cypress.log({
-    displayName: `--- ${window.logCalls}. ${msg.toUpperCase()} ---`,
-    message: '\n'
-  });
+//   Cypress.log({
+//     displayName: `--- ${window.logCalls}. ${msg.toUpperCase()} ---`,
+//     message: '\n'
+//   });
 
-  window.testFlow.push(`${window.logCalls}. ${msg}`);
-  window.logCalls++;
+//   window.testFlow.push(`${window.logCalls}. ${msg}`);
+//   window.logCalls++;
 
-});
+// });
 
-Cypress.on('fail', (err) => {
-  err.message += `${'\n\n' + 'Test flow was:\n\n'}${window.testFlow.join('\n')}`;
-  throw err;
-});
+// Cypress.on('fail', (err) => {
+//   err.message += `${'\n\n' + 'Test flow was:\n\n'}${window.testFlow.join('\n')}`;
+//   throw err;
+// });
+
+import './customCommands/Custom.actions.cy'

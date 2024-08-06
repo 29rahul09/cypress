@@ -1,11 +1,21 @@
-describe('empty spec', () => {
-  it('passes', () => {
-    cy.visit('https://www.google.com')
-    cy.get('.gLFyf').type('doubtnut.com{enter}')
-    cy.wait(2000)
-    cy.contains('Videos').click()
-    cy.wait(1000)
-    cy.contains('Question Bank').click()
+describe("JUST TEST THE TUTES", () => {
+  it("CUSTOMIZE LOG MESSAGE", () => {
+    cy.log("normal");
+    cy.log("**Rahul-In-Bold**");
+    cy.log("_Rahul-In-Italic_");
+    cy.log("[link](<https://www.google.com/>)");
+  });
 
-  })
-})
+  it("CUSTOMIZE ERROR MESSAGE", () => {
+    cy.visit("https://gh.bmj.com/")
+      .get('[data-testid="top-menu-logo"]')
+      .then((logo) => {
+        expect(logo, "Logo Not Found").to.contain.text("BMJ logo");
+      });
+  });
+
+  it.only('Login By Custom Commands', () => {
+    cy.loginApp()
+  });
+
+});
