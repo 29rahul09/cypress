@@ -1,7 +1,7 @@
 const journal = "neurologyopen";
 const domain = "https://neurologyopen.bmj.com";
 
-describe("Visit and Investigate URLs", () => {
+describe("Investigate Article Page on Live-site", () => {
   it(`should visit url and check the response`, () => {
     const results = [{ url: "URL", status: "STATUS" }];
     cy.fixture(`${journal}.json`).then((urls) => {

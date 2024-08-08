@@ -1,4 +1,4 @@
-const issuePages = ["https://neurologyopen.bmj.com/content/3/Suppl_1"];
+const issuePages = ["https://neurologyopen.bmj.com/content/5/Suppl_1"];
 const journal = "neurologyopen";
 const domain = "https://neurologyopen.bmj.com";
 const articleUrlId = `cypress/fixtures/${journal}.json`;
