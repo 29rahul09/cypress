@@ -1,70 +1,105 @@
 const journal = "neurologyopen";
 const domain = "https://neurologyopen.bmj.com";
 
-describe("Investigate Article Page on Live-site", () => {
-  it(`should visit url and check the response`, () => {
-    const results = [{ url: "URL", status: "STATUS" }];
-    cy.fixture(`${journal}.json`).then((urls) => {
-      // Visit each article page and check for specific sections
-      urls.forEach((url) => {
-        // cy.visit(`${domain}${url}`, { failOnStatusCode: false });
-        cy.request(`${domain}${url}`, { failOnStatusCode: false }).then(
-          (response) => {
-            // Push URL and status to results array
-            results.push({ url: url, status: response.status });
-
-            // Write to CSV file after last URL is processed
-            if (results.length === urls.length + 1) {
-              const csvContent = results
-                .map((result) => `${result.url},${result.status}`)
-                .join("\n");
-              cy.writeFile(
-                `cypress/inspection/${journal}/HW/ArticleResponse.csv`,
-                csvContent
-              );
-            }
-          }
-        );
-      });
-    });
-  });
-
-  it.only('should visit url and find the Article Headings', () => {
-    const results = [];
-    
+describe("Investigate Article url on Live-site", () => {
+  it("should visit url and find the Article Headings", () => {
     cy.fixture(`${journal}.json`).then((urls) => {
       const visitUrlAndCollectHeadings = (url, index) => {
         cy.visit(`${domain}${url}`, { failOnStatusCode: false });
-        cy.get('body').find('h2').then(($headings) => {
-          const headingsText = [];
-          
-          $headings.each((index, $el) => {
-            const headingText = Cypress.$($el).text();
-            if (Cypress.$($el).is(':visible') && headingText !== 'Cookies and privacy' && headingText !== 'You are here') {
-              headingsText.push(headingText);
-            }
+        cy.get("body")
+          .find("h2")
+          .then(($headings) => {
+            const headingsText = [];
+
+            $headings.each((index, $el) => {
+              const headingText = Cypress.$($el).text();
+              if (
+                Cypress.$($el).is(":visible") &&
+                headingText !== "Cookies and privacy" &&
+                headingText !== "You are here"
+              ) {
+                headingsText.push(headingText);
+              }
+            });
+            // && (headingText === 'Abstract' || headingText === 'Supplementary urls' || headingText === 'Supplementary materials' || headingText === 'Statistics from Altmetric.com')
+            // Sort headings alphabetically
+            headingsText.sort();
+
+            const result = {
+              url,
+              headings: headingsText.join(" | "),
+            };
+
+            // Write the output after each URL is processed
+            const csvContent = `${result.url},${result.headings}\n`;
+            cy.writeFile(
+              `cypress/inspection/${journal}/HW/ArticleHeadings.csv`,
+              csvContent,
+              { flag: "a+" }
+            );
           });
-  // && (headingText === 'Abstract' || headingText === 'Supplementary Data' || headingText === 'Supplementary materials' || headingText === 'Statistics from Altmetric.com')
-          // Sort headings alphabetically
-          headingsText.sort();
-  
-          results.push({ url: url, headings: headingsText.join(' | ') });
-  
-          // Check if all URLs have been processed
-            const csvContent = results
-              .map((result) => `${result.url},${result.headings}`)
-              .join('\n');
-            cy.writeFile(`cypress/inspection/${journal}/HW/ArticleHeadings.csv`, csvContent);
-          
-        });
       };
-  
+
       urls.forEach((url, index) => {
         visitUrlAndCollectHeadings(url, index);
       });
     });
   });
-  
-  
-  
+
+  it.skip("Find if the article has Boxed text and External Links", () => {
+    cy.fixture(`${journal}.json`).then((urls) => {
+      const processUrls = (url) => {
+        return cy
+          .visit({
+            url: `${domain}${url}`,
+            failOnStatusCode: false,
+          })
+          .then(() => {
+            cy.get("body").then(($body) => {
+              let hasCTLinks = false;
+              let hasKeyMessageBox = false;
+              let hasBodyTextBox = false;
+              let hasFigNTabWithRef = false;
+
+              if ($body.find('*[class^="external-ref"]').length > 0) {
+                hasCTLinks = true;
+              }
+              if (
+                $body.find("#boxed-text-1").length > 0 ||
+                $body.find(".boxed-text").length > 0
+              ) {
+                hasKeyMessageBox = true;
+              }
+              if ($body.find("#boxed-text-2").length > 0) {
+                hasBodyTextBox = true;
+              }
+              if (
+                $body.find(".table-caption > p > a").length > 0 ||
+                $body.find(".fig-caption > p > a").length > 0
+              ) {
+                hasFigNTabWithRef = true;
+              }
+
+              const result = {
+                url,
+                CTLinks: hasCTLinks,
+                keyMessageBox: hasKeyMessageBox,
+                bodyTextBox: hasBodyTextBox,
+                figNTabWithRef: hasFigNTabWithRef,
+              };
+
+              // Write the output after each URL is processed
+              const csvContent = `${result.url},${result.CTLinks},${result.keyMessageBox},${result.bodyTextBox},${result.figNTabWithRef}\n`;
+              cy.writeFile(
+                `cypress/inspection/${journal}/HW/externalLinks.csv`,
+                csvContent,
+                { flag: "a+" }
+              );
+            });
+          });
+      };
+
+      urls.forEach((url) => processUrls(url));
+    });
+  });
 });
