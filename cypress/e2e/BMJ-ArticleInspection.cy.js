@@ -1,10 +1,22 @@
-const issueAandVol = ["https://gocm.bmj.com/content/4/3","https://gocm.bmj.com/content/4/2","https://gocm.bmj.com/content/4/1"];
-const journal = "GOCM";
-const domain = "https://gocm.bmj.com";
+const issueAandVol = [
+  "https://bmjopenrespres.bmj.com/content/1/1",
+  "https://bmjopenrespres.bmj.com/content/2/1",
+  "https://bmjopenrespres.bmj.com/content/3/1",
+  "https://bmjopenrespres.bmj.com/content/4/1",
+  "https://bmjopenrespres.bmj.com/content/5/1",
+  "https://bmjopenrespres.bmj.com/content/6/1",
+  "https://bmjopenrespres.bmj.com/content/7/1",
+  "https://bmjopenrespres.bmj.com/content/8/1",
+  "https://bmjopenrespres.bmj.com/content/9/1",
+  "https://bmjopenrespres.bmj.com/content/10/1",
+  "https://bmjopenrespres.bmj.com/content/11/1",
+];
+const journal = "bmjopenrespres";
+const domain = "https://bmjopenrespresbmj.com";
 const articleUrlId = `cypress/fixtures/${journal}.json`;
 
 describe("Article Page Sections", () => {
-  it("Find Article URL", () => {
+  it.only("Find Article URL", () => {
     const articleUrls = [];
 
     issueAandVol.forEach((page) => {

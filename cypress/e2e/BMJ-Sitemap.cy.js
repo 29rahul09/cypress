@@ -2,7 +2,7 @@
 
 describe('Sitemap Parsing', () => {
     it('Extracts loc elements from XML sitemap and writes to JSON file', () => {
-      const url = 'https://neurologyopen.bmj.com/pages/sitemap.xml';
+      const url = 'https://bmjopenrespres.bmj.com/pages/sitemap.xml';
   
       // Fetch the XML sitemap
       cy.request(url).then((response) => {

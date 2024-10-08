@@ -1,10 +1,10 @@
-const issuePages = ["https://neurologyopen.bmj.com/content/5/Suppl_1"];
-const journal = "neurologyopen";
-const domain = "https://neurologyopen.bmj.com";
+const issuePages = ["https://bmjopensem.bmj.com/content/8/Suppl_1"];
+const journal = "bmjopensem";
+const domain = "https://bmjopensem.bmj.com";
 const articleUrlId = `cypress/fixtures/${journal}.json`;
 
 describe("Pagination Test", () => {
-  it("should navigate through all pages", () => {
+  it("should navigate through all Supply pages", () => {
     const articleUrls = [];
 
     const getOnPageArticles = () => {

@@ -1,8 +1,29 @@
-const journal = "neurologyopen";
-const domain = "https://neurologyopen.bmj.com";
+const journal = "Tsaco";
+const domain = "https://tsaco.bmj.com";
+const issueAandVol = "/8/1";
 
 describe("Investigate Article url on Live-site", () => {
-  it("should visit url and find the Article Headings", () => {
+  it.skip("Find Article URL",() => {
+    
+    const articleUrlId = `cypress/fixtures/${journal}.json`;
+    const articleUrls = [];
+
+      cy.visit({
+        url: `${domain}/content${issueAandVol}`,
+        failOnStatusCode: false,
+      });
+
+      cy.get(".issue-toc")
+        .find("a")
+        .each(($ele) => {
+          articleUrls.push($ele.attr("href"));
+        })
+        .then(() => {
+          cy.writeFile(articleUrlId, articleUrls);
+        });
+  
+  });
+  it.skip("should visit url and find the Article Headings", () => {
     cy.fixture(`${journal}.json`).then((urls) => {
       const visitUrlAndCollectHeadings = (url, index) => {
         cy.visit(`${domain}${url}`, { failOnStatusCode: false });
@@ -33,7 +54,7 @@ describe("Investigate Article url on Live-site", () => {
             // Write the output after each URL is processed
             const csvContent = `${result.url},${result.headings}\n`;
             cy.writeFile(
-              `cypress/inspection/${journal}/HW/ArticleHeadings.csv`,
+              `cypress/inspection/${journal}/HW/ArticleHeadings${issueAandVol}.csv`,
               csvContent,
               { flag: "a+" }
             );
@@ -46,7 +67,7 @@ describe("Investigate Article url on Live-site", () => {
     });
   });
 
-  it.skip("Find if the article has Boxed text and External Links", () => {
+  it("Find if the article has Boxed text and External Links", () => {
     cy.fixture(`${journal}.json`).then((urls) => {
       const processUrls = (url) => {
         return cy
@@ -91,7 +112,7 @@ describe("Investigate Article url on Live-site", () => {
               // Write the output after each URL is processed
               const csvContent = `${result.url},${result.CTLinks},${result.keyMessageBox},${result.bodyTextBox},${result.figNTabWithRef}\n`;
               cy.writeFile(
-                `cypress/inspection/${journal}/HW/externalLinks.csv`,
+                `cypress/inspection/${journal}/HW/externalLinks${issueAandVol}.csv`,
                 csvContent,
                 { flag: "a+" }
               );
