@@ -11,6 +11,7 @@ describe(
     const brokenImages = [];
     const nonBrokenImages = [];
     const missingSupplementary = [];
+    const noSupplementary = [];
     const missingRR = [];
 
     const validateArticlePage = (articleUrl) => {
@@ -67,11 +68,11 @@ describe(
           );
         } else {
           cy.log("No Supplementary link found on this page.");
-          // missingSupplementary.push(articleUrl);
-          // cy.writeFile(
-          //   `cypress/inspection/SmokeTest/${journal}/supply.csv`,
-          //   missingSupplementary
-          // );
+          noSupplementary.push(articleUrl);
+          cy.writeFile(
+            `cypress/inspection/SmokeTest/${journal}/supply.csv`,
+            noSupplementary
+          );
         }
       });
     };
