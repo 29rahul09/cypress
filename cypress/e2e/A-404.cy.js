@@ -11,8 +11,11 @@ describe("FIND & FIX 404 LINKS", () => {
         .then(() => {
           links.forEach((link) => {
             cy.request({ url:link,failOnStatusCode: false }).then((response) => {
-cy.log(response.status)
             //  expect(response.status).to.eq(200);
+            if (response.status !== 200) {
+              cy.log(`The link ${link} is broken`);
+              cy.writeFile("cypress/downloads/404Links.csv", link);
+            }
             });
           });
         });
