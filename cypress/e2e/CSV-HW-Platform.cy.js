@@ -1,126 +1,92 @@
-const journal = "Tsaco";
-const domain = "https://tsaco.bmj.com";
-const issueAandVol = "/8/1";
+const journal = "bmjopensem";
+const domain = "https://bmjopensem.bmj.com";
 
-describe("Investigate Article url on Live-site", () => {
-  it.skip("Find Article URL",() => {
-    
-    const articleUrlId = `cypress/fixtures/${journal}.json`;
-    const articleUrls = [];
-
+describe(
+  "Investigate Article URL on Live-site",
+  {
+    viewportHeight: 800,
+    viewportWidth: 1280,
+  },
+  () => {
+    const inspectArticlePage = (articleUrl) => {
       cy.visit({
-        url: `${domain}/content${issueAandVol}`,
+        url: `${domain}${articleUrl}`,
         failOnStatusCode: false,
       });
+      cy.intercept({ resourceType: /xhr|fetch/ }, { log: false });
+      validateImages(articleUrl);
+      visitUrlAndCollectHeadings(articleUrl);
+      processUrls(articleUrl);
+    };
 
-      cy.get(".issue-toc")
-        .find("a")
-        .each(($ele) => {
-          articleUrls.push($ele.attr("href"));
-        })
-        .then(() => {
-          cy.writeFile(articleUrlId, articleUrls);
+    const validateImages = (articleUrl) => {
+      const brokenImages = [];
+
+      cy.get("#article-top").find("img").each(($img) => {
+        const src = $img.attr("src");
+        const alt = $img.attr("alt");
+        const width = $img.prop("naturalWidth");
+
+        if (width === 0) {
+          brokenImages.push(`${articleUrl} ==> ${src} ==> ${alt}`);
+        }
+      }).then(() => {
+        if (brokenImages.length > 0) {
+          cy.writeFile(
+            `cypress/inspection/${journal}/HW/BrokenImage.csv`,
+            "Broken Image URL\n" + brokenImages.join("\n")
+          );
+        } else {
+          cy.log("No broken images found on this page.");
+        }
+      });
+    };
+
+    const visitUrlAndCollectHeadings = (url) => {
+      cy.get("body h2:visible").then(($headings) => {
+        const headingsText = Array.from($headings).map(($el) => Cypress.$($el).text())
+          .filter(text => text !== "Cookies and privacy" && text !== "You are here")
+          .sort()
+          .join(" | ");
+
+        const csvContent = `${url},${headingsText}\n`;
+        cy.writeFile(
+          `cypress/inspection/${journal}/HW/ArticleHeadings.csv`,
+          csvContent,
+          { flag: "a+" }
+        );
+      });
+    };
+
+    const processUrls = (url) => {
+      cy.get("body").then(($body) => {
+        const result = {
+          url,
+          CTLinks: $body.find('*[class^="external-ref"]').length > 0,
+          keyMessageBox: $body.find("#boxed-text-1, .boxed-text").length > 0,
+          bodyTextBox: $body.find("#boxed-text-2").length > 0,
+          figNTabWithRef: $body.find(".table-caption > p > a, .fig-caption > p > a").length > 0,
+        };
+
+        const csvContent = `${result.url},${result.CTLinks},${result.keyMessageBox},${result.bodyTextBox},${result.figNTabWithRef}\n`;
+        cy.writeFile(
+          `cypress/inspection/${journal}/HW/externalLinks.csv`,
+          csvContent,
+          { flag: "a+" }
+        );
+      });
+    };
+
+    it("Inspect article pages", () => {
+      cy.fixture(`${journal}.json`).then((data) => {
+        data.forEach((articleUrl) => {
+          inspectArticlePage(articleUrl);
+          cy.writeFile(
+            `cypress/inspection/${journal}/HW/lastVisitedUrl.csv`,
+            articleUrl
+          );
         });
-  
-  });
-  it.skip("should visit url and find the Article Headings", () => {
-    cy.fixture(`${journal}.json`).then((urls) => {
-      const visitUrlAndCollectHeadings = (url, index) => {
-        cy.visit(`${domain}${url}`, { failOnStatusCode: false });
-        cy.get("body")
-          .find("h2")
-          .then(($headings) => {
-            const headingsText = [];
-
-            $headings.each((index, $el) => {
-              const headingText = Cypress.$($el).text();
-              if (
-                Cypress.$($el).is(":visible") &&
-                headingText !== "Cookies and privacy" &&
-                headingText !== "You are here"
-              ) {
-                headingsText.push(headingText);
-              }
-            });
-            // && (headingText === 'Abstract' || headingText === 'Supplementary urls' || headingText === 'Supplementary materials' || headingText === 'Statistics from Altmetric.com')
-            // Sort headings alphabetically
-            headingsText.sort();
-
-            const result = {
-              url,
-              headings: headingsText.join(" | "),
-            };
-
-            // Write the output after each URL is processed
-            const csvContent = `${result.url},${result.headings}\n`;
-            cy.writeFile(
-              `cypress/inspection/${journal}/HW/ArticleHeadings${issueAandVol}.csv`,
-              csvContent,
-              { flag: "a+" }
-            );
-          });
-      };
-
-      urls.forEach((url, index) => {
-        visitUrlAndCollectHeadings(url, index);
       });
     });
-  });
-
-  it("Find if the article has Boxed text and External Links", () => {
-    cy.fixture(`${journal}.json`).then((urls) => {
-      const processUrls = (url) => {
-        return cy
-          .visit({
-            url: `${domain}${url}`,
-            failOnStatusCode: false,
-          })
-          .then(() => {
-            cy.get("body").then(($body) => {
-              let hasCTLinks = false;
-              let hasKeyMessageBox = false;
-              let hasBodyTextBox = false;
-              let hasFigNTabWithRef = false;
-
-              if ($body.find('*[class^="external-ref"]').length > 0) {
-                hasCTLinks = true;
-              }
-              if (
-                $body.find("#boxed-text-1").length > 0 ||
-                $body.find(".boxed-text").length > 0
-              ) {
-                hasKeyMessageBox = true;
-              }
-              if ($body.find("#boxed-text-2").length > 0) {
-                hasBodyTextBox = true;
-              }
-              if (
-                $body.find(".table-caption > p > a").length > 0 ||
-                $body.find(".fig-caption > p > a").length > 0
-              ) {
-                hasFigNTabWithRef = true;
-              }
-
-              const result = {
-                url,
-                CTLinks: hasCTLinks,
-                keyMessageBox: hasKeyMessageBox,
-                bodyTextBox: hasBodyTextBox,
-                figNTabWithRef: hasFigNTabWithRef,
-              };
-
-              // Write the output after each URL is processed
-              const csvContent = `${result.url},${result.CTLinks},${result.keyMessageBox},${result.bodyTextBox},${result.figNTabWithRef}\n`;
-              cy.writeFile(
-                `cypress/inspection/${journal}/HW/externalLinks${issueAandVol}.csv`,
-                csvContent,
-                { flag: "a+" }
-              );
-            });
-          });
-      };
-
-      urls.forEach((url) => processUrls(url));
-    });
-  });
-});
+  }
+);

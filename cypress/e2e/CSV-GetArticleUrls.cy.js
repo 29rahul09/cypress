@@ -1,33 +1,38 @@
 const issueAandVol = [
-    "https://bmjopensem.bmj.com/content/10/4",
-    "https://bmjopensem.bmj.com/content/10/3",
-    "https://bmjopensem.bmj.com/content/10/2",
-    "https://bmjopensem.bmj.com/content/10/1",
+  "https://bmjopenquality.bmj.com/content/6/1",
+  "https://bmjopenquality.bmj.com/content/6/2",
   
-  ];
-  
-  const journal = "bmjopensem";
-  const articleUrlId = `cypress/fixtures/${journal}.json`;
-  
-  describe("Article Page Sections", () => {
-    // Test to fetch article URLs
-    it("Find Article URL", () => {
-      const articleUrls = [];
-  
-      issueAandVol.forEach((page) => {
-        cy.visit(page, { failOnStatusCode: false });
-  
-        cy.get(".issue-toc")
-          .find("a")
-          .each(($ele) => {
-            articleUrls.push($ele.attr("href"));
-          })
-          .then(() => {
-            cy.writeFile(articleUrlId, articleUrls);
-          });
+];
+
+const journal = "bmjopenquality";
+
+describe("Article Urls Collection", () => {
+  // Fumction to fetch article URLs
+  const collectArticleURls = (page) => {
+    const articleUrls = [];
+
+    cy.visit(page, { failOnStatusCode: false });
+
+    cy.get(".issue-toc")
+      .find("a")
+      .each(($ele) => {
+        articleUrls.push($ele.attr("href"));
+      })
+      .then(() => {
+        if (articleUrls.length > 0) {
+          cy.writeFile(
+            `cypress/inspection/${journal}/HW/articleUrls.csv`,
+            articleUrls,
+            {
+              flag: "a+",
+            }
+          );
+        }
       });
+  };
+  it("Visit Issue And Volume Page", () => {
+    issueAandVol.forEach((issueAndVolume) => {
+      collectArticleURls(issueAndVolume);
     });
-  
-    
   });
-  
+});
