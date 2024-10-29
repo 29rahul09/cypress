@@ -1,5 +1,5 @@
-const journal = "bmjopensem";
-const domain = "https://bmjopensem-stage-next.bmj.com";
+const journal = "bmjopenquality";
+const domain = "https://bmjopenquality-stage-next.bmj.com";
 
 describe(
   "Run Smoke Test on Stage-site",
@@ -21,49 +21,73 @@ describe(
       validateSupplementaryMaterials(articleUrl);
       validateRapidResponses(articleUrl);
     };
+
+    const writeUniqueEntriesToFile = (filePath, entries) => {
+      cy.writeFile(filePath, "", { flag: "a+" }).then(() => {
+        cy.readFile(filePath, "utf8").then((existingContent) => {
+          const existingEntries = existingContent
+            ? existingContent.split("\n")
+            : [];
+          const newEntries = entries.filter(
+            (entry) => !existingEntries.includes(entry)
+          );
+          if (newEntries.length > 0) {
+            cy.writeFile(filePath, newEntries.join("\n") + "\n", {
+              flag: "a+",
+            });
+          }
+        });
+      });
+    };
+
     const validateTopBoxSection = (articleUrl) => {
       const topBoxError = [];
       cy.get("body").then(($body) => {
-        const promises = []; // Array to store promises
+        const promises = [];
 
-        if ($body.find("#article-title-1").length > 0) {
-          promises.push(cy.get("h1#article-title-1").should("be.visible"));
-        }
+        const selectors = {
+          title: "h1#article-title-1",
+          requestPermissions:
+            '[data-testid="request-permissions"] [data-testid="request-permissions-text"]',
+          citation: '[data-testid="citation"]',
+          share: '[data-testid="share"]',
+          pdfLink: '[data-testid="pdf"] a',
+        };
 
-        if (
-          $body.find(
-            '[data-testid="request-permissions"] [data-testid="request-permissions-text"]'
-          ).length > 0
-        ) {
+        Object.entries(selectors).forEach(([key, selector]) => {
+          if ($body.find(selector).length > 0) {
+            switch (key) {
+              case "title":
+                promises.push(cy.get(selector).should("be.visible"));
+                break;
+              case "requestPermissions":
+                promises.push(
+                  cy
+                    .get(selector)
+                    .should("exist")
+                    .contains("Request permission")
+                );
+                break;
+              case "citation":
+                promises.push(
+                  cy.get(selector).should("exist").contains("Cite this article")
+                );
+                break;
+              case "share":
+                promises.push(
+                  cy.get(selector).should("exist").contains("Share")
+                );
+                break;
+              default:
+                break;
+            }
+          }
+        });
+
+        if ($body.find(selectors.pdfLink).length > 0) {
           promises.push(
             cy
-              .get(
-                '[data-testid="request-permissions"] [data-testid="request-permissions-text"]'
-              )
-              .should("exist")
-              .contains("Request permission")
-          );
-        }
-
-        if ($body.find('[data-testid="citation"]').length > 0) {
-          promises.push(
-            cy
-              .get('[data-testid="citation"]')
-              .should("exist")
-              .contains("Cite this article")
-          );
-        }
-
-        if ($body.find('[data-testid="share"]').length > 0) {
-          promises.push(
-            cy.get('[data-testid="share"]').should("exist").contains("Share")
-          );
-        }
-
-        if ($body.find('[data-testid="pdf"] a').length > 0) {
-          promises.push(
-            cy
-              .get('[data-testid="pdf"] a')
+              .get(selectors.pdfLink)
               .should("have.attr", "href")
               .then((href) => {
                 return cy
@@ -72,52 +96,76 @@ describe(
                     if (response.status !== 200) {
                       topBoxError.push(`PDF link is missing ==> ${articleUrl}`);
                     }
+                  })
+                  .then(() => {
+                    if (topBoxError.length > 0) {
+                      writeUniqueEntriesToFile(
+                        `cypress/inspection/SmokeTest/${journal}/TopBoxError.csv`,
+                        topBoxError
+                      );
+                    }
                   });
               })
           );
         }
-
-        // Wait for all promises to resolve
-        Promise.all(promises).then(() => {
-          if (topBoxError.length > 0) {
-            const topBoxCsvContent = "Top Box Error\n" + topBoxError.join("\n");
-            cy.writeFile(
-              `cypress/inspection/SmokeTest/${journal}/TopBoxError.csv`,
-              topBoxCsvContent
-            );
-          }
-        });
+        return Promise.all(promises);
       });
     };
 
     const validateSupplementaryMaterials = (articleUrl) => {
       const missingSupplementary = [];
-      const noSupplementary = [];
+      const nonSupplementary = [];
       cy.get("body").then(($body) => {
         if ($body.find("#supplementary-materials").length > 0) {
-          cy.get("#supplementary-materials").click();
-          cy.get('[data-testid="supplementary-link-container"] a').each(
-            ($anchor) => {
-              const url = $anchor.prop("href");
-              cy.request({ url: url, failOnStatusCode: false }).then(
-                (response) => {
-                  if (response.status !== 200) {
-                    missingSupplementary.push(articleUrl);
-                    cy.writeFile(
-                      `cypress/inspection/SmokeTest/${journal}/missingSupply.csv`,
-                      missingSupplementary
-                    );
-                  }
+          cy.get('[data-testid="overview-list"] a').then(($anchor) => {
+            const urls = [];
+            $anchor.each((index, element) => {
+              urls.push(element.href);
+            });
+            if (urls.some((url) => url.includes("supplementary-materials"))) {
+              cy.get("#supplementary-materials").click();
+              cy.get('[data-testid="supplementary-link-container"] a').each(
+                ($anchor) => {
+                  const url = $anchor.prop("href");
+                  cy.request({
+                    url: url,
+                    failOnStatusCode: false,
+                    timeout: 6000,
+                  })
+                    .then((response) => {
+                      if (response.status !== 200) {
+                        missingSupplementary.push(
+                          `Error in Supplementary Files ==> ${articleUrl} ==> ${url}`
+                        );
+                      }
+                    })
+                    .then(() => {
+                      if (missingSupplementary.length > 0) {
+                        writeUniqueEntriesToFile(
+                          `cypress/inspection/SmokeTest/${journal}/missingSupply.csv`,
+                          missingSupplementary
+                        );
+                      }
+                    });
                 }
               );
+            } else {
+              missingSupplementary.push(
+                `NO Supplementary in Overview ==> ${articleUrl}`
+              );
+
+              writeUniqueEntriesToFile(
+                `cypress/inspection/SmokeTest/${journal}/missingSupply.csv`,
+                missingSupplementary
+              );
             }
-          );
+          });
         } else {
-          cy.log("No Supplementary link found on this page.");
-          noSupplementary.push(articleUrl);
-          cy.writeFile(
-            `cypress/inspection/SmokeTest/${journal}/supply.csv`,
-            noSupplementary
+          nonSupplementary.push(`NO Supplementary Files ==> ${articleUrl}`);
+
+          writeUniqueEntriesToFile(
+            `cypress/inspection/SmokeTest/${journal}/NonSupplymentary.csv`,
+            nonSupplementary
           );
         }
       });
@@ -125,19 +173,61 @@ describe(
 
     const validateRapidResponses = (articleUrl) => {
       const missingRR = [];
+      const noOverview = [];
       cy.get("body").then(($body) => {
-        if ($body.find("#rapid-responses").length > 0) {
-          cy.get("#rapid-responses").click();
-          cy.get('[data-testid="compose-rapid-response"] a').each(($anchor) => {
-            const url = $anchor.prop("href");
-            cy.request(url).its("status").should("eq", 200);
-          });
+        if ($body.find('[data-testid="overview-list"]').length > 0) {
+          cy.get('[data-testid="overview-list"] a')
+            .last()
+            .then(($anchor) => {
+              const url = $anchor.prop("href");
+              const text = $anchor.text();
+              if (
+                text === "Rapid Responses" &&
+                url.includes("rapid-responses")
+              ) {
+                cy.get("#rapid-responses").click();
+                cy.get('[data-testid="compose-rapid-response"] a').each(
+                  ($anchor) => {
+                    const url = $anchor.prop("href");
+                    cy.request({
+                      url: url,
+                      failOnStatusCode: false,
+                      timeout: 6000,
+                    })
+                      .then((response) => {
+                        if (response.status !== 200) {
+                          missingRR.push(
+                            `No Submission Page ==> ${articleUrl} ==> ${url}`
+                          );
+                        }
+                      })
+                      .then(() => {
+                        if (missingRR.length > 0) {
+                          writeUniqueEntriesToFile(
+                            `cypress/inspection/SmokeTest/${journal}/missingRR.csv`,
+                            missingRR
+                          );
+                        }
+                      });
+                  }
+                );
+              } else {
+                missingRR.push(
+                  `NO Rapid response in Overview ==> ${articleUrl}`
+                );
+
+                writeUniqueEntriesToFile(
+                  `cypress/inspection/SmokeTest/${journal}/missingRR.csv`,
+                  missingRR
+                );
+              }
+            });
         } else {
-          cy.log("No RR found on this page.");
-          missingRR.push(articleUrl);
-          cy.writeFile(
-            `cypress/inspection/SmokeTest/${journal}/RResponse.csv`,
-            missingRR
+          noOverview.push(`NO Overview ==> ${articleUrl}`);
+
+          writeUniqueEntriesToFile(
+            `cypress/inspection/SmokeTest/${journal}/noOverview.csv`,
+            noOverview
           );
         }
       });
@@ -145,30 +235,23 @@ describe(
 
     const validateImages = (articleUrl) => {
       const brokenImages = [];
-      const nonBrokenImages = [];
       cy.get("main")
         .find("img")
-        .each(($img, i) => {
+        .each(($img) => {
           const src = $img.attr("src");
           const alt = $img.attr("alt");
           const width = $img.prop("naturalWidth");
 
           if (width === 0) {
             brokenImages.push(`${articleUrl} ==> ${src} ==> ${alt}`);
-          } else {
-            nonBrokenImages.push(`${src} ==> ${alt}`);
           }
         })
         .then(() => {
           if (brokenImages.length > 0) {
-            const brokenCsvContent =
-              "Broken Image URL\n" + brokenImages.join("\n");
-            cy.writeFile(
+            writeUniqueEntriesToFile(
               `cypress/inspection/SmokeTest/${journal}/BrokenImage.csv`,
-              brokenCsvContent
+              brokenImages
             );
-          } else {
-            cy.log("No broken images found on this page.");
           }
         });
     };

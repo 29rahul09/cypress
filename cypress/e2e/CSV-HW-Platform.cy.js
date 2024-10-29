@@ -1,5 +1,5 @@
-const journal = "bmjopensem";
-const domain = "https://bmjopensem.bmj.com";
+const journal = "bmjopenquality";
+const domain = "https://bmjopenquality.bmj.com";
 
 describe(
   "Investigate Article URL on Live-site",
@@ -14,9 +14,10 @@ describe(
         failOnStatusCode: false,
       });
       cy.intercept({ resourceType: /xhr|fetch/ }, { log: false });
-      validateImages(articleUrl);
-      visitUrlAndCollectHeadings(articleUrl);
-      processUrls(articleUrl);
+      // validateImages(articleUrl);
+      // visitUrlAndCollectHeadings(articleUrl);
+      // processUrls(articleUrl);
+      validateSupplementaryMaterials(articleUrl);
     };
 
     const validateImages = (articleUrl) => {
@@ -76,6 +77,31 @@ describe(
         );
       });
     };
+
+    const validateSupplementaryMaterials = (articleUrl) => {
+      const supplementary = [];
+      const supplemental = [];
+    
+      const processLinks = (selector, list) => {
+        cy.get(selector).find('a').each(($anchor) => {
+          const url = $anchor.prop("href");
+          const text = $anchor.text();
+          list.push(`${articleUrl} ==> ${text} ==> ${url}`);
+        });
+      };
+    
+      cy.get("body").then(($body) => {
+        if ($body.find("#supplementary-materials").length > 0) {
+          processLinks("#supplementary-materials", supplementary);
+          cy.writeFile(`cypress/inspection/${journal}/HW/Supplementry.csv`, supplementary, { flag: "a+" });
+        } 
+        if ($body.find(".supplementary-material").length > 0) {
+          processLinks(".supplementary-material", supplemental);
+          cy.writeFile(`cypress/inspection/${journal}/HW/Supplemental.csv`, supplemental, { flag: "a+" });
+        }
+      });
+    };
+    
 
     it("Inspect article pages", () => {
       cy.fixture(`${journal}.json`).then((data) => {

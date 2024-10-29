@@ -1,38 +1,62 @@
 const issueAandVol = [
-  "https://bmjopenquality.bmj.com/content/6/1",
-  "https://bmjopenquality.bmj.com/content/6/2",
+  "https://lupus.bmj.com/content/9/1",
+  "https://lupus.bmj.com/content/9/Suppl_3",
+  "https://lupus.bmj.com/content/9/Suppl_2",
+  "https://lupus.bmj.com/content/9/Suppl_1",
   
 ];
 
-const journal = "bmjopenquality";
-
+const journal = "lupus";
+const domain = "https://lupus.bmj.com";
 describe("Article Urls Collection", () => {
-  // Fumction to fetch article URLs
-  const collectArticleURls = (page) => {
-    const articleUrls = [];
+  const articleUrls = [];
 
-    cy.visit(page, { failOnStatusCode: false });
+    const getOnPageArticles = () => {
+      cy.get(".highwire-search-results-list a").each(($articleLink) => {
+        articleUrls.push($articleLink.attr("href"));
+      });
+    };
 
-    cy.get(".issue-toc")
-      .find("a")
-      .each(($ele) => {
-        articleUrls.push($ele.attr("href"));
-      })
-      .then(() => {
-        if (articleUrls.length > 0) {
-          cy.writeFile(
-            `cypress/inspection/${journal}/HW/articleUrls.csv`,
-            articleUrls,
-            {
-              flag: "a+",
+    const navigateToNextPage = () => {
+      cy.get("body").then(($body) => {
+        if ($body.find(".pager-next").length > 0) {
+          cy.get(".pager-next").then(($button) => {
+            if ($button.is(":visible") && !$button.is(":disabled")) {
+              cy.wrap($button).click();
+              cy.wait(500);
+              getOnPageArticles();
+              navigateToNextPage();
             }
-          );
+          });
         }
       });
-  };
+    };
+
+
   it("Visit Issue And Volume Page", () => {
-    issueAandVol.forEach((issueAndVolume) => {
-      collectArticleURls(issueAndVolume);
-    });
+  
+    issueAandVol.forEach((page) => {
+      cy.visit(page, { failOnStatusCode: false });
+      cy.get(".issue-toc a")
+      .each(($link) => {
+        const href = $link.attr("href");
+        if(href.includes("content")){
+          articleUrls.push(href);
+        }
+        if(href.includes("search")){
+          cy.visit(`${domain}${href}`, { failOnStatusCode: false });
+          getOnPageArticles();
+          navigateToNextPage();
+        }
+      
+      })
+       
+      .then(() => {
+        cy.writeFile(`cypress/fixtures/${journal}.json`, articleUrls);
+      });
+    })
+    
+
   });
 });
+
