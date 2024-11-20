@@ -1,4 +1,4 @@
-export const validateRapidResponsesTest = (articleUrl,journal) => {
+export const validateRapidResponsesTest = (articleUrl, journal) => {
   const writeUniqueEntriesToFile = (filePath, entries) => {
     cy.writeFile(filePath, "", { flag: "a+" }).then(() => {
       cy.readFile(filePath, "utf8").then((existingContent) => {
@@ -16,65 +16,70 @@ export const validateRapidResponsesTest = (articleUrl,journal) => {
       });
     });
   };
-    const missingRR = [];
-    const noOverview = [];
-    cy.get("body").then(($body) => {
-      if ($body.find('[data-testid="overview-list"]').length > 0) {
-        cy.get('[data-testid="overview-list"] a')
-          .last()
-          .then(($anchor) => {
-            const url = $anchor.prop("href");
-            const text = $anchor.text();
-            if (
-              text === "Rapid Responses" &&
-              url.includes("rapid-responses")
-            ) {
-              cy.get("#rapid-responses").click();
-              cy.get('[data-testid="compose-rapid-response"] a').each(
-                ($anchor) => {
-                  const url = $anchor.prop("href");
-                  cy.request({
-                    url: url,
-                    failOnStatusCode: false,
-                    timeout: 6000,
-                  })
-                    .then((response) => {
-                      if (response.status !== 200 && response.status !== 401) {
-                        missingRR.push(
-                          `No Submission Page ==> ${articleUrl} ==> ${url}`
-                        );
-                      }
-                    })
-                    .then(() => {
-                      if (missingRR.length > 0) {
-                        writeUniqueEntriesToFile(
-                          `cypress/SmokeTest/${journal}/missingRR.csv`,
-                          missingRR
-                        );
-                      }
-                    });
-                }
-              );
-            } else {
-              missingRR.push(
-                `NO Rapid response in Overview ==> ${articleUrl}`
-              );
+  const missingResponses = [];
+  const noRapidResponses = [];
 
-              writeUniqueEntriesToFile(
-                `cypress/SmokeTest/${journal}/missingRR.csv`,
-                missingRR
-              );
-            }
-          });
-      } else {
-        noOverview.push(`NO Overview ==> ${articleUrl}`);
-
-        writeUniqueEntriesToFile(
-          `cypress/SmokeTest/${journal}/noOverview.csv`,
-          noOverview
+  cy.get("body").then(($body) => {
+    const bodyResponses = $body.find("#rapid-responses").length > 0;
+    if ($body.find('[data-testid="overview"]').length > 0) {
+      cy.get('[data-testid="overview-list"] a').then(($anchor) => {
+        const urls = [];
+        $anchor.each((index, element) => {
+          urls.push(element.href);
+        });
+        const overviewResponses = urls.some((url) =>
+          url.includes("rapid-responses")
         );
-      }
-    });
-  };
+        if (overviewResponses && bodyResponses) {
+          cy.get("#rapid-responses").click();
+          cy.get('[data-testid="compose-rapid-response"] a').each(($anchor) => {
+            const url = $anchor.prop("href");
+            cy.request({
+              url: url,
+              failOnStatusCode: false,
+              timeout: 6000,
+            })
+              .then((response) => {
+                if (response.status !== 200) {
+                  missingResponses.push(
+                    `Error in Responses Files ==> ${articleUrl} ==> ${url}`
+                  );
+                }
+              })
+              .then(() => {
+                if (missingResponses.length > 0) {
+                  writeUniqueEntriesToFile(
+                    `cypress/SmokeTest/${journal}/missingResponses.csv`,
+                    missingResponses
+                  );
+                }
+              });
+          });
+        } else if (overviewResponses && !bodyResponses) {
+          missingResponses.push(`NO Responses in Body ==> ${articleUrl}`);
 
-  export default validateRapidResponsesTest;
+          writeUniqueEntriesToFile(
+            `cypress/SmokeTest/${journal}/missingResponses.csv`,
+            missingResponses
+          );
+        } else if (!overviewResponses && bodyResponses) {
+          missingResponses.push(`NO Responses in Overview ==> ${articleUrl}`);
+
+          writeUniqueEntriesToFile(
+            `cypress/SmokeTest/${journal}/missingResponses.csv`,
+            missingResponses
+          );
+        } else {
+          nonResponses.push(`NO Responses Files ==> ${articleUrl}`);
+
+          writeUniqueEntriesToFile(
+            `cypress/SmokeTest/${journal}/NoResponses.csv`,
+            noRapidResponses
+          );
+        }
+      });
+    }
+  });
+};
+
+export default validateRapidResponsesTest;

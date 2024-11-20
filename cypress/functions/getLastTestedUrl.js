@@ -19,7 +19,10 @@ export const runFromLastTestedUrl = (journal, domain) => {
       .then((data) => data.testedUrls || []);
   }
 
-  describe("URL Testing", () => {
+  describe("URL Testing", {
+    viewportHeight: 800,
+    viewportWidth: 1280,
+  }, () => {
     let testedUrls = [];
     let lastTestedIndex = -1;
 
