@@ -9,12 +9,11 @@ const pdfImageId = `cypress/downloads/${journal}/pdfImage.csv`;
 
 describe("Search and Find PDF Only Article Page ", () => {
   // Test to fetch article URLs
-  it.only("Find Article URL", () => {
+  it("Find Article URL", () => {
     const articleUrls = [];
 
     issueAandVol.forEach((page) => {
       cy.visit(page, { failOnStatusCode: false });
-
       cy.get(".issue-toc")
         .find("a")
         .each(($ele) => {
@@ -23,23 +22,6 @@ describe("Search and Find PDF Only Article Page ", () => {
         .then(() => {
           cy.writeFile(articleUrlId, articleUrls);
         });
-    });
-  });
-
-  // Check article page response
-  it("Find Article Page Response", () => {
-    // Read article URLs from JSON file
-    cy.fixture(`${journal}.json`).then((data) => {
-      // Visit each article page and check for specific image pdfImage
-      data.forEach((page) => {
-        cy.visit(`${domain}${page}`, { failOnStatusCode: false });
-
-        cy.request(`${domain}${page}`, { failOnStatusCode: false }).then(
-          (response) => {
-            expect(response.status).to.eq(200);
-          }
-        );
-      });
     });
   });
 

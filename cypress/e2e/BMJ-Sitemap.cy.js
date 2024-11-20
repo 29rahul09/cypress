@@ -2,7 +2,8 @@
 
 describe('Sitemap Parsing', () => {
     it('Extracts loc elements from XML sitemap and writes to JSON file', () => {
-      const url = 'https://bmjopenrespres.bmj.com/pages/sitemap.xml';
+      // npx cypress run --headless --browser chrome --spec "cypress/e2e/BMJ-Sitemap.cy.js"
+      const url = 'https://gh.bmj.com/pages/sitemap.xml';
   
       // Fetch the XML sitemap
       cy.request(url).then((response) => {

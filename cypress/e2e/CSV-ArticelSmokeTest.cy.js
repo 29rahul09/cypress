@@ -1,5 +1,6 @@
-const journal = "bmjopenquality";
-const domain = "https://bmjopenquality-stage-next.bmj.com";
+// npx cypress run --headless --browser chrome --spec "cypress/e2e/CSV-ArticelSmokeTest.cy.js"
+const journal = "GlobalHealth";
+const domain = "https://gh-stage-next.bmj.com";
 
 describe(
   "Run Smoke Test on Stage-site",
@@ -12,6 +13,10 @@ describe(
       cy.visit({
         url: `${domain}${articleUrl}`,
         failOnStatusCode: false,
+        auth: {
+          username: "BMJStaging",
+          password: "bmj2410",
+        },
       });
 
       cy.intercept({ resourceType: /xhr|fetch/ }, { log: false });
@@ -47,8 +52,7 @@ describe(
 
         const selectors = {
           title: "h1#article-title-1",
-          requestPermissions:
-            '[data-testid="request-permissions"] [data-testid="request-permissions-text"]',
+          requestPermissions: '[data-testid="request-permissions"]',
           citation: '[data-testid="citation"]',
           share: '[data-testid="share"]',
           pdfLink: '[data-testid="pdf"] a',
@@ -65,7 +69,26 @@ describe(
                   cy
                     .get(selector)
                     .should("exist")
-                    .contains("Request permission")
+                    .should("have.attr", "href")
+                    .then((href) => {
+                      return cy
+                        .request({ url: `${href}`, failOnStatusCode: false })
+                        .then((response) => {
+                          if (response.status !== 200) {
+                            topBoxError.push(
+                              `Request Permission Error ==> ${articleUrl}`
+                            );
+                          }
+                        })
+                        .then(() => {
+                          if (topBoxError.length > 0) {
+                            writeUniqueEntriesToFile(
+                              `cypress/inspection/SmokeTest/${journal}/TopBoxError.csv`,
+                              topBoxError
+                            );
+                          }
+                        });
+                    })
                 );
                 break;
               case "citation":
@@ -94,7 +117,7 @@ describe(
                   .request({ url: `${href}`, failOnStatusCode: false })
                   .then((response) => {
                     if (response.status !== 200) {
-                      topBoxError.push(`PDF link is missing ==> ${articleUrl}`);
+                      topBoxError.push(`PDF Button Error ==> ${articleUrl}`);
                     }
                   })
                   .then(() => {
@@ -257,7 +280,7 @@ describe(
     };
 
     it("Validate article pages", () => {
-      cy.fixture(`${journal}.json`).then((data) => {
+      cy.fixture(`GH.json`).then((data) => {
         data.forEach((articleUrl) => {
           validateArticlePage(articleUrl);
           cy.writeFile(

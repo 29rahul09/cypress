@@ -1,8 +1,8 @@
 // const path = require('path');
 // const outputPath = path.join(__dirname, '../../cypress/results/testedUrls.json');
 
-const journal = "test";
-const domain = "https://lupus.bmj.com";
+const journal = "OpenQuality";
+const domain = "https://bmjopenquality.bmj.com";
 const outputPath = `cypress/downloads/${journal}/testedUrls.json`;
 
 function writeToJson(testedUrls) {
@@ -16,7 +16,7 @@ function readFromJson() {
 }
 
 describe(
-  "Test Article URL on Live-site",
+  `Testing Article URL On ${journal} Journal`,
   {
     viewportHeight: 800,
     viewportWidth: 1280,
@@ -43,63 +43,8 @@ describe(
       });
     };
 
-    const checkPageImages = (articleUrl) => {
-      const brokenImages = [];
-      cy.get("main")
-        .find("img")
-        .each(($img) => {
-          const src = $img.attr("src");
-          const alt = $img.attr("alt");
-          const width = $img.prop("naturalWidth");
-
-          if (width === 0) {
-            brokenImages.push(`${articleUrl} ==> ${src} ==> ${alt}`);
-          }
-        })
-        .then(() => {
-          if (brokenImages.length > 0) {
-            writeUniqueEntriesToFile(
-              `cypress/downloads/${journal}/BrokenImage.csv`,
-              brokenImages
-            );
-          } else {
-            cy.log("No broken images found on this page.");
-          }
-        });
-    };
-
-    const checkTopBox = (url) => {
-      const topBoxLinks = [];
-      cy.get("body")
-        .then(($body) => {
-          const result = {
-            url,
-            title: $body.find("h1#article-title-1").length > 0,
-            publicationDate: $body.find('[data-testid="publication-icon"]').length > 0,
-            requestPermissions: $body.find('[data-testid="rights-and-permissions"] a').length > 0,
-            citation: $body.find('[data-testid="citation"]').length > 0,
-            share: $body.find('[data-testid="share"]').length > 0,
-            pdfLink :$body.find('[data-testid="pdf"] a').length > 0,
-      
-          };
-          topBoxLinks.push(
-            `${result.url}, Title ==> ${result.title}, Date ==> ${result.publicationDate}, Permission ==> ${result.requestPermissions}, Citation ==> ${result.citation}, Share ==> ${result.share}, PDF ==> ${result.pdfLink}`
-          );
-        })
-        .then(() => {
-          if (topBoxLinks.length > 0) {
-            writeUniqueEntriesToFile(
-              `cypress/downloads/${journal}/topBoxLinks.csv`,
-              topBoxLinks
-            );
-          }
-        });
-    };
-
     const inspectArticlePage = (articleUrl) => {
       cy.intercept({ resourceType: /xhr|fetch/ }, { log: false });
-      checkPageImages(articleUrl);
-      checkTopBox(articleUrl);
     };
 
     before(() => {
@@ -114,8 +59,10 @@ describe(
         .then(() => {
           // Read the last tested URLs and load fixture data
           return readFromJson().then((previousTestedUrls) => {
-            return cy.fixture(`${journal}.json`).then((data) => {
+            return cy.fixture(`${journal}_AricleUrls.json`).then((data) => {
               testedUrls = data || []; // Ensure testedUrls is an array
+
+              cy.log(JSON.stringify(testedUrls));
 
               if (previousTestedUrls.length > 0) {
                 lastTestedIndex = testedUrls.indexOf(

@@ -46,6 +46,11 @@ module.exports = defineConfig({
       screenshotOnRunFailure = true;
       require("cypress-mochawesome-reporter/plugin")(on); // for html reports
       on("task", { readPdf, downloadFile,csvToJson });
+      on('task', {
+        fileExists(filePath) {
+          return fs.existsSync(filePath);
+        }
+      });
     },
   },
 });

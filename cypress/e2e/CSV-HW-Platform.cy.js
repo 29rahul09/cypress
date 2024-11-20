@@ -1,117 +1,217 @@
-const journal = "bmjopenquality";
+// const path = require('path');
+// const outputPath = path.join(__dirname, '../../cypress/results/testedUrls.json');
+
+const journal = "OpenQuality";
 const domain = "https://bmjopenquality.bmj.com";
+const outputPath = `cypress/downloads/${journal}/testedUrls.json`;
+
+function writeToJson(testedUrls) {
+  return cy.writeFile(outputPath, { testedUrls }, { log: true });
+}
+
+function readFromJson() {
+  return cy
+    .readFile(outputPath, { log: true })
+    .then((data) => data.testedUrls || []);
+}
 
 describe(
-  "Investigate Article URL on Live-site",
+  "Test Article URL on Live-site",
   {
     viewportHeight: 800,
     viewportWidth: 1280,
   },
   () => {
-    const inspectArticlePage = (articleUrl) => {
-      cy.visit({
-        url: `${domain}${articleUrl}`,
-        failOnStatusCode: false,
+    let testedUrls = [];
+    let lastTestedIndex = -1;
+
+    const writeUniqueEntriesToFile = (filePath, entries) => {
+      cy.writeFile(filePath, "", { flag: "a+" }).then(() => {
+        cy.readFile(filePath, "utf8").then((existingContent) => {
+          const existingEntries = existingContent
+            ? existingContent.split("\n")
+            : [];
+          const newEntries = entries.filter(
+            (entry) => !existingEntries.includes(entry)
+          );
+          if (newEntries.length > 0) {
+            cy.writeFile(filePath, newEntries.join("\n") + "\n", {
+              flag: "a+",
+            });
+          }
+        });
       });
+    };
+
+    const inspectArticlePage = (articleUrl) => {
       cy.intercept({ resourceType: /xhr|fetch/ }, { log: false });
-      // validateImages(articleUrl);
-      // visitUrlAndCollectHeadings(articleUrl);
-      // processUrls(articleUrl);
+      validateImages(articleUrl);
+      visitUrlAndCollectHeadings(articleUrl);
+      processUrls(articleUrl);
       validateSupplementaryMaterials(articleUrl);
     };
 
     const validateImages = (articleUrl) => {
       const brokenImages = [];
 
-      cy.get("#article-top").find("img").each(($img) => {
-        const src = $img.attr("src");
-        const alt = $img.attr("alt");
-        const width = $img.prop("naturalWidth");
+      cy.get("#article-top")
+        .find("img")
+        .each(($img) => {
+          const src = $img.attr("src");
+          const alt = $img.attr("alt");
+          const width = $img.prop("naturalWidth");
 
-        if (width === 0) {
-          brokenImages.push(`${articleUrl} ==> ${src} ==> ${alt}`);
-        }
-      }).then(() => {
-        if (brokenImages.length > 0) {
-          cy.writeFile(
-            `cypress/inspection/${journal}/HW/BrokenImage.csv`,
-            "Broken Image URL\n" + brokenImages.join("\n")
-          );
-        } else {
-          cy.log("No broken images found on this page.");
-        }
-      });
+          if (width === 0) {
+            brokenImages.push(`${articleUrl} ==> ${src} ==> ${alt}`);
+          }
+        })
+        .then(() => {
+          if (brokenImages.length > 0) {
+            writeUniqueEntriesToFile(
+              `cypress/downloads/${journal}/HW/BrokenImage.csv`,
+              brokenImages
+            );
+          } else {
+            cy.log("No broken images found on this page.");
+          }
+        });
     };
 
     const visitUrlAndCollectHeadings = (url) => {
-      cy.get("body h2:visible").then(($headings) => {
-        const headingsText = Array.from($headings).map(($el) => Cypress.$($el).text())
-          .filter(text => text !== "Cookies and privacy" && text !== "You are here")
-          .sort()
-          .join(" | ");
-
-        const csvContent = `${url},${headingsText}\n`;
-        cy.writeFile(
-          `cypress/inspection/${journal}/HW/ArticleHeadings.csv`,
-          csvContent,
-          { flag: "a+" }
-        );
-      });
+      const heading = [];
+      cy.get("body h2:visible")
+        .then(($headings) => {
+          const headingsText = Array.from($headings)
+            .map(($el) => Cypress.$($el).text())
+            .filter(
+              (text) =>
+                text !== "Cookies and privacy" && text !== "You are here"
+            )
+            .sort()
+            .join(" | ");
+          heading.push(`${url}, ${headingsText}\n`);
+        })
+        .then(() => {
+          if (heading.length > 0) {
+            writeUniqueEntriesToFile(
+              `cypress/downloads/${journal}/HW/ArticleHeadings.csv`,
+              heading
+            );
+          }
+        });
     };
 
     const processUrls = (url) => {
-      cy.get("body").then(($body) => {
-        const result = {
-          url,
-          CTLinks: $body.find('*[class^="external-ref"]').length > 0,
-          keyMessageBox: $body.find("#boxed-text-1, .boxed-text").length > 0,
-          bodyTextBox: $body.find("#boxed-text-2").length > 0,
-          figNTabWithRef: $body.find(".table-caption > p > a, .fig-caption > p > a").length > 0,
-        };
+      const externalLinks = [];
+      cy.get("body")
+        .then(($body) => {
+          const result = {
+            url,
+            CTLinks: $body.find('*[class^="external-ref"]').length > 0,
+            keyMessageBox: $body.find("#boxed-text-1, .boxed-text").length > 0,
+            bodyTextBox: $body.find("#boxed-text-2").length > 0,
+            figNTabWithRef:
+              $body.find(".table-caption > p > a, .fig-caption > p > a")
+                .length > 0,
+          };
 
-        const csvContent = `${result.url},${result.CTLinks},${result.keyMessageBox},${result.bodyTextBox},${result.figNTabWithRef}\n`;
-        cy.writeFile(
-          `cypress/inspection/${journal}/HW/externalLinks.csv`,
-          csvContent,
-          { flag: "a+" }
-        );
-      });
+          externalLinks.push(
+            `${result.url}, CTlinks ==> ${result.CTLinks}, keyMessageBox ==> ${result.keyMessageBox}, bodyTextBox ==> ${result.bodyTextBox}, TableFigure ==> ${result.figNTabWithRef}\n`
+          );
+        })
+        .then(() => {
+          if (externalLinks.length > 0) {
+            writeUniqueEntriesToFile(
+              `cypress/downloads/${journal}/HW/externalLinks.csv`,
+              externalLinks
+            );
+          }
+        });
     };
 
     const validateSupplementaryMaterials = (articleUrl) => {
       const supplementary = [];
       const supplemental = [];
-    
+
       const processLinks = (selector, list) => {
-        cy.get(selector).find('a').each(($anchor) => {
-          const url = $anchor.prop("href");
-          const text = $anchor.text();
-          list.push(`${articleUrl} ==> ${text} ==> ${url}`);
-        });
+        cy.get(selector)
+          .find("a")
+          .each(($anchor) => {
+            const href = $anchor.prop("href");
+            const text = $anchor.text();
+            list.push(`${articleUrl} ==> ${text} ==> ${href}`);
+          });
       };
-    
+
       cy.get("body").then(($body) => {
         if ($body.find("#supplementary-materials").length > 0) {
           processLinks("#supplementary-materials", supplementary);
-          cy.writeFile(`cypress/inspection/${journal}/HW/Supplementry.csv`, supplementary, { flag: "a+" });
-        } 
+          writeUniqueEntriesToFile(
+            `cypress/downloads/${journal}/HW/Supplementry.csv`,
+            supplementary
+          );
+        }
         if ($body.find(".supplementary-material").length > 0) {
           processLinks(".supplementary-material", supplemental);
-          cy.writeFile(`cypress/inspection/${journal}/HW/Supplemental.csv`, supplemental, { flag: "a+" });
+          writeUniqueEntriesToFile(
+            `cypress/downloads/${journal}/HW/Supplemental.csv`,
+            supplemental
+          );
         }
       });
     };
-    
 
-    it("Inspect article pages", () => {
-      cy.fixture(`${journal}.json`).then((data) => {
-        data.forEach((articleUrl) => {
-          inspectArticlePage(articleUrl);
-          cy.writeFile(
-            `cypress/inspection/${journal}/HW/lastVisitedUrl.csv`,
-            articleUrl
-          );
+    before(() => {
+      // Ensure output file exists and is empty at the start if not already present
+      return cy
+        .task("fileExists", outputPath)
+        .then((exists) => {
+          if (!exists) {
+            return writeToJson([]);
+          }
+        })
+        .then(() => {
+          // Read the last tested URLs and load fixture data
+          return readFromJson().then((previousTestedUrls) => {
+            return cy.fixture(`${journal}_AricleUrls.json`).then((data) => {
+              testedUrls = data || []; // Ensure testedUrls is an array
+
+              if (previousTestedUrls.length > 0) {
+                lastTestedIndex = testedUrls.indexOf(
+                  previousTestedUrls[previousTestedUrls.length - 1]
+                );
+              }
+
+              // If last tested index is found, slice the array to start from there
+              if (lastTestedIndex >= 0) {
+                testedUrls = testedUrls.slice(lastTestedIndex + 1);
+              }
+            });
+          });
         });
+    });
+
+    it("tests all URLs", () => {
+      // Ensure testedUrls is defined and has values before proceeding
+      cy.wrap(testedUrls).should("not.be.empty"); // This is a valid Cypress assertion
+
+      testedUrls.forEach((url) => {
+        // Wrap the visit and request in a Cypress command queue
+        cy.visit({
+          url: `${domain}/content${url}`,
+          failOnStatusCode: false,
+        })
+          .then(() => {
+            inspectArticlePage(url);
+          })
+          .then(() => {
+            console.log(`Tested URL: ${url}`);
+            // Read and write back to the JSON file after each test
+            return readFromJson().then((currentTestedUrls) => {
+              currentTestedUrls.push(url);
+              return writeToJson(currentTestedUrls);
+            });
+          });
       });
     });
   }
