@@ -1,7 +1,7 @@
 // const path = require('path');
 // const outputPath = path.join(__dirname, '../../cypress/results/testedUrls.json');
 
-const journal = "JITC";
+const journal = "test";
 const domain = "https://jitc.bmj.com";
 const outputPath = `cypress/downloads/${journal}/testedUrls.json`;
 
@@ -45,64 +45,11 @@ describe(
 
     const inspectArticlePage = (articleUrl) => {
       cy.intercept({ resourceType: /xhr|fetch/ }, { log: false });
-      validateImages(articleUrl);
-      visitUrlAndCollectHeadings(articleUrl);
       processUrls(articleUrl);
-      validateSupplementaryMaterials(articleUrl);
-    };
-
-    const validateImages = (articleUrl) => {
-      const brokenImages = [];
-
-      cy.get("#article-top")
-        .find("img")
-        .each(($img) => {
-          const src = $img.attr("src");
-          const alt = $img.attr("alt");
-          const width = $img.prop("naturalWidth");
-
-          if (width === 0) {
-            brokenImages.push(`${articleUrl} ==> ${src} ==> ${alt}`);
-          }
-        })
-        .then(() => {
-          if (brokenImages.length > 0) {
-            writeUniqueEntriesToFile(
-              `cypress/downloads/${journal}/HW/BrokenImage.csv`,
-              brokenImages
-            );
-          } else {
-            cy.log("No broken images found on this page.");
-          }
-        });
-    };
-
-    const visitUrlAndCollectHeadings = (url) => {
-      const heading = [];
-      cy.get("body h2:visible")
-        .then(($headings) => {
-          const headingsText = Array.from($headings)
-            .map(($el) => Cypress.$($el).text())
-            .filter(
-              (text) =>
-                text !== "Cookies and privacy" && text !== "You are here"
-            )
-            .sort()
-            .join(" | ");
-          heading.push(`${url}, ${headingsText}\n`);
-        })
-        .then(() => {
-          if (heading.length > 0) {
-            writeUniqueEntriesToFile(
-              `cypress/downloads/${journal}/HW/ArticleHeadings.csv`,
-              heading
-            );
-          }
-        });
     };
 
     const processUrls = (url) => {
-      const externalLinks = [{ url: "URL", videoInAbstract: "VIDEO", tableInAbstract: "TABLE", figureInAbstract: "FIGURE", CTLinks: "CTLINKS", keyMessageBox: "KEYMESSAGEBOX", bodyTextBox: "BODYTEXTBOX", figNTabWithRef: "FIGNTABWITHREF" }];
+      const externalLinks = [];
       cy.get("body")
         .then(($body) => {
           const result = {
@@ -118,51 +65,18 @@ describe(
                 .length > 0,
           };
 
-          externalLinks.push(result);
+          externalLinks.push(
+            `${result.url}, videoInAbstract ==> ${result.videoInAbstract}, tableInAbstract ==> ${result.tableInAbstract}, figureInAbstract ==> ${result.figureInAbstract},  CTlinks ==> ${result.CTLinks}, keyMessageBox ==> ${result.keyMessageBox}, bodyTextBox ==> ${result.bodyTextBox}, TableFigure ==> ${result.figNTabWithRef}\n`
+          );
         })
         .then(() => {
           if (externalLinks.length > 0) {
-            const csvContent = externalLinks.map(link => 
-              `${link.url},${link.videoInAbstract},${link.tableInAbstract},${link.figureInAbstract},${link.CTLinks},${link.keyMessageBox},${link.bodyTextBox},${link.figNTabWithRef}`
-            ).join("\n");
             writeUniqueEntriesToFile(
-              `cypress/downloads/${journal}/HW/externalLinks.csv`,
-              csvContent.split("\n")
+              `cypress/downloads/${journal}/externalLinks.csv`,
+              externalLinks
             );
           }
         });
-    };
-
-    const validateSupplementaryMaterials = (articleUrl) => {
-      const supplementary = [];
-      const supplemental = [];
-
-      const processLinks = (selector, list) => {
-        cy.get(selector)
-          .find("a")
-          .each(($anchor) => {
-            const href = $anchor.prop("href");
-            const text = $anchor.text();
-            list.push(`${articleUrl} ==> ${text} ==> ${href}`);
-          });
-      };
-
-      cy.get("body").then(($body) => {
-        if ($body.find("#supplementary-materials").length > 0) {
-          processLinks("#supplementary-materials", supplementary);
-          writeUniqueEntriesToFile(
-            `cypress/downloads/${journal}/HW/Supplementry.csv`,
-            supplementary
-          );
-        }
-        if ($body.find(".supplementary-material").length > 0) {
-          processLinks(".supplementary-material", supplemental);
-          writeUniqueEntriesToFile(
-            `cypress/downloads/${journal}/HW/Supplemental.csv`,
-            supplemental
-          );
-        }
-      });
     };
 
     before(() => {
@@ -177,7 +91,7 @@ describe(
         .then(() => {
           // Read the last tested URLs and load fixture data
           return readFromJson().then((previousTestedUrls) => {
-            return cy.fixture(`${journal}_AricleUrls.json`).then((data) => {
+            return cy.fixture(`${journal}.json`).then((data) => {
               testedUrls = data || []; // Ensure testedUrls is an array
 
               if (previousTestedUrls.length > 0) {
@@ -220,3 +134,81 @@ describe(
     });
   }
 );
+
+// npx cypress run --headless --browser chrome --spec "cypress/e2e/daily_404_test_run.cy.js"
+describe("Check all links are reachable", () => {
+  const brokenLinks = [];
+  const batchSize = 1; // Define the batch size for incremental writes
+
+  // Helper function to process links on a page
+  const processLinksOnPage = (page, url) => {
+    cy.visit(url);
+    cy.get("a").each(($link) => {
+      const href = $link.prop("href");
+
+      // Ensure the href is not empty or a javascript link
+      if (href && href.match(/\/content\/\d+/)) {
+        // Use cy.request to check if the link is valid
+        cy.request({
+          url: href,
+          failOnStatusCode: false, // Don't fail the test on non-2xx responses
+        }).then((response) => {
+          if (response.status >= 200 && response.status < 400) {
+            console.log(`${response.status} OK`);
+          } else {
+            brokenLinks.push({
+              page: page,
+              href: href,
+              status: response.status,
+            });
+
+            // Write to file in batches
+            if (brokenLinks.length >= batchSize) {
+              writeBrokenLinksToFile();
+            }
+          }
+        });
+      }
+    });
+  };
+
+  // Helper function to process a list of pages
+  const processPages = (pages) => {
+    pages.forEach((page) => {
+      // Check home page links
+      processLinksOnPage(page, page);
+
+      // Check TOC page links
+      processLinksOnPage(page, `${page}/content/current`);
+    });
+  };
+
+  // Write broken links to a CSV file in batches
+  const writeBrokenLinksToFile = () => {
+    if (brokenLinks.length > 0) {
+      const csvContent = brokenLinks
+            .map(
+          (result) => `${result.href}`
+            )
+            .join("\n");
+          cy.writeFile(
+            `cypress/downloads/Daily_404/brokenLinks.csv`,
+            csvContent
+          );
+
+      // Clear the brokenLinks array after writing to the file
+      brokenLinks.length = 0; // Clear array to prevent memory overload
+    }
+  };
+
+  it("should check that all links return a 2xx status code", () => {
+    cy.fixture("homePage.json").then((data) => {
+      processPages(data); // Process all pages in the fixture
+    });
+  });
+
+  // Write any remaining broken links after the test run is complete
+  after(() => {
+    writeBrokenLinksToFile();
+  });
+});

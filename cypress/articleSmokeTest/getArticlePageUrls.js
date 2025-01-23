@@ -1,7 +1,6 @@
 export const runGetArticleUrls = (journal, domain) => {
   describe(`Get All ArticlePage Urls`, () => {
     const articleUrls = [];
-    const supplyPageUrls = [];
     let reloadCount = 0;
 
     const getOnPageArticles = () => {
@@ -57,20 +56,6 @@ export const runGetArticleUrls = (journal, domain) => {
       });
     };
 
-    const getSupplyPageArticle = () => {
-      cy.fixture(`${journal}_SupplyPageUrls.json`).then((data) => {
-        data.forEach((page) => {
-       cy.visit(`${domain}${href}`, { failOnStatusCode: false });
-                  getOnPageArticles();
-                  navigateToNextPage();
-
-        });
-      }
-      );
-    }
-
-
-
     it("Collects all the article Urls", () => {
       cy.fixture(`${journal}_Vol&Issue.json`).then((data) => {
         data.forEach((page) => {
@@ -92,11 +77,9 @@ export const runGetArticleUrls = (journal, domain) => {
                   articleUrls.push(href);
                 }
                 if (href.includes("search")) {
-                  supplyPageUrls.push(`${domain}${href}`);
-                  cy.writeFile(`cypress/fixtures/${journal}_SupplyPageUrls.json`, supplyPageUrls);
-                  // cy.visit(`${domain}${href}`, { failOnStatusCode: false });
-                  // getOnPageArticles();
-                  // navigateToNextPage();
+                  cy.visit(`${domain}${href}`, { failOnStatusCode: false });
+                  getOnPageArticles();
+                  navigateToNextPage();
                 }
               });
             }
@@ -104,9 +87,7 @@ export const runGetArticleUrls = (journal, domain) => {
             .then(() => {
               if (articleUrls.length > 0) {
                 var newUrls = articleUrls.map(function (url) {
-                  // return url.split("/content")[1]; // Remove everything before "/content"
-                  return url;
-
+                  return url.split("/content")[1]; // Remove everything before "/content"
                 });
                 cy.writeFile(`cypress/fixtures/${journal}_AricleUrls.json`, newUrls);
               }

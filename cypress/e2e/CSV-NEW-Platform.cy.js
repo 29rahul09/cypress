@@ -1,8 +1,10 @@
 // const path = require('path');
 // const outputPath = path.join(__dirname, '../../cypress/results/testedUrls.json');
 
+const { title } = require("process");
+
 const journal = "test";
-const domain = "https://lupus.bmj.com";
+const domain = "https://bmjopensem.bmj.com";
 const outputPath = `cypress/downloads/${journal}/testedUrls.json`;
 
 function writeToJson(testedUrls) {
@@ -69,32 +71,32 @@ describe(
     };
 
     const checkTopBox = (url) => {
-      const topBoxLinks = [];
+      const topBoxLinks = [{ url: "URL", title: "TITLE", publicationDate: "DATE", requestPermissions: "PERMISSIONS", citation: "CITATION", share: "SHARE", pdfLink: "PDF LINK" }];
       cy.get("body")
         .then(($body) => {
           const result = {
-            url,
-            title: $body.find("h1#article-title-1").length > 0,
-            publicationDate: $body.find('[data-testid="publication-icon"]').length > 0,
-            requestPermissions: $body.find('[data-testid="rights-and-permissions"] a').length > 0,
-            citation: $body.find('[data-testid="citation"]').length > 0,
-            share: $body.find('[data-testid="share"]').length > 0,
-            pdfLink :$body.find('[data-testid="pdf"] a').length > 0,
-      
+        url,
+        title: $body.find("h1#article-title-1").length > 0,
+        publicationDate: $body.find('[data-testid="publication-icon"]').length > 0,
+        requestPermissions: $body.find('[data-testid="rights-and-permissions"] a').length > 0,
+        citation: $body.find('[data-testid="citation"]').length > 0,
+        share: $body.find('[data-testid="share"]').length > 0,
+        pdfLink: $body.find('[data-testid="pdf"] a').length > 0,
           };
-          topBoxLinks.push(
-            `${result.url}, Title ==> ${result.title}, Date ==> ${result.publicationDate}, Permission ==> ${result.requestPermissions}, Citation ==> ${result.citation}, Share ==> ${result.share}, PDF ==> ${result.pdfLink}`
-          );
+          topBoxLinks.push(result);
         })
         .then(() => {
           if (topBoxLinks.length > 0) {
-            writeUniqueEntriesToFile(
-              `cypress/downloads/${journal}/topBoxLinks.csv`,
-              topBoxLinks
-            );
+        const csvContent = topBoxLinks.map(link => 
+          `${link.url},${link.title},${link.publicationDate},${link.requestPermissions},${link.citation},${link.share},${link.pdfLink}`
+        ).join("\n");
+        writeUniqueEntriesToFile(
+          `cypress/downloads/${journal}/topBoxLinks.csv`,
+          csvContent.split("\n")
+        );
           }
         });
-    };
+        };
 
     const inspectArticlePage = (articleUrl) => {
       cy.intercept({ resourceType: /xhr|fetch/ }, { log: false });
@@ -139,7 +141,7 @@ describe(
       testedUrls.forEach((url) => {
         // Wrap the visit and request in a Cypress command queue
         cy.visit({
-          url: `${domain}/content${url}`,
+          url: `${domain}${url}`,
           failOnStatusCode: false,
         })
           .then(() => {

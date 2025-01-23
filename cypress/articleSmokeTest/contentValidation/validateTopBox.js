@@ -1,3 +1,5 @@
+import { title } from "process";
+
 export const validateTopBoxSectionTest = (articleUrl, journal) => {
   const writeUniqueEntriesToFile = (filePath, entries) => {
     cy.writeFile(filePath, "", { flag: "a+" }).then(() => {
@@ -15,6 +17,34 @@ export const validateTopBoxSectionTest = (articleUrl, journal) => {
         }
       });
     });
+  };
+  const processUrls = (url) => {
+    const externalLinks = [];
+    cy.get("body")
+      .then(($body) => {
+        const result = {
+          url,
+          title: $body.find("h1#article-title-1").length > 0,
+          requestPermissions: $body.find('[data-testid="request-permissions"]').length > 0,
+          citation: $body.find('[data-testid="citation"]').length > 0,
+          share: $body.find('[data-testid="share"]').length > 0,
+          pdfLink: $body.find('[data-testid="pdf"] a').length > 0,
+          tableTitle: $body.find('[data-testid="table-title"]').length > 0,
+          publicationDate: $body.find('[data-testid="publication-icon"]').length > 0,
+        };
+
+        externalLinks.push(
+          `${result.url}, title ==> ${result.title}, requestPermissions ==> ${result.requestPermissions}, citation ==> ${result.citation},  share ==> ${result.share}, pdfLink ==> ${result.pdfLink}, tableTitle ==> ${result.tableTitle}, publicationDate ==> ${result.publicationDate}\n`
+        );
+      })
+      .then(() => {
+        if (externalLinks.length > 0) {
+          writeUniqueEntriesToFile(
+            `cypress/downloads/${journal}/HW/externalLinks.csv`,
+            externalLinks
+          );
+        }
+      });
   };
     const topBoxError = [];
     cy.get("body").then(($body) => {

@@ -1,24 +1,25 @@
-const pages = ["https://adc.bmj.com/", "https://adc.bmj.com/pages/about"];
-describe("FIND & FIX 404 LINKS", () => {
-  it("Navigate through the links on ${pages}", () => {
-    pages.forEach((page) => {
-      cy.visit(page);
-      var links = [];
-      cy.get("a:not([href*='https://soundcloud.com/bmjpodcasts/sets/adc-podcast'])")
-        .each(($ele) => {
-          links.push($ele.attr("href"));
-        })
-        .then(() => {
-          links.forEach((link) => {
-            cy.request({ url:link,failOnStatusCode: false }).then((response) => {
-            //  expect(response.status).to.eq(200);
-            if (response.status !== 200) {
-              cy.log(`The link ${link} is broken`);
-              cy.writeFile("cypress/downloads/404Links.csv", link);
-            }
+describe("Check all links are reachable", () => {
+  it("should check that all links return a 2xx status code", () => {
+    cy.fixture("homePage.json").then((data) => {
+      data.forEach((page) => {
+        cy.visit(page);
+        // Find all anchor tags on the page
+        cy.get("a").each(($link) => {
+          const href = $link.prop("href"); // Get the href attribute of the link
+
+          // Ensure the href is not empty or a javascript link
+          if (href && href.includes("content")) {
+            // Use cy.request to check if the link is valid
+            cy.request({
+              url: href,
+              failOnStatusCode: false, // Don't fail the test on non-2xx responses
+            }).then((response) => {
+              // Ensure the link returns a 2xx status code (success)
+              expect(response.status).to.be.within(200, 299);
             });
-          });
+          }
         });
+      });
     });
   });
 });

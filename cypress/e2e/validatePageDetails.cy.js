@@ -3,7 +3,7 @@
 import { runFromLastTestedUrl } from "../functions/getLastTestedUrl";
 
 
-const journal = "OpenQuality";
-const stageSite = "https://bmjopenquality-stage-next.bmj.com";
+const journal = "RMD";
+const stageSite = "https://rmdopen-stage-next.bmj.com";
 
 runFromLastTestedUrl(journal, stageSite);

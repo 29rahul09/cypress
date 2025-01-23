@@ -65,7 +65,7 @@ export const runFromLastTestedUrl = (journal, domain) => {
       testedUrls.forEach((url) => {
         // Wrap the visit and request in a Cypress command queue
         cy.visit({
-          url: `${domain}${url}`,
+          url: `${domain}/content${url}`,
           failOnStatusCode: false,
           auth: {
             username: "BMJStaging",
