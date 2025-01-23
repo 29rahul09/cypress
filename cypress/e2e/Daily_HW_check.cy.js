@@ -43,7 +43,7 @@ describe("Check all links are reachable", () => {
           .then(() => {
             if (highWireLinks.length >= batchSize) {
               const csvContent = highWireLinks
-                .map((result) => `${result.page}, ${result.href}`)
+                .map((result) => `${result.href}`)
                 .join("\n");
               cy.writeFile(
                 `cypress/downloads/Daily/highWireLinks.csv`,
@@ -59,7 +59,7 @@ describe("Check all links are reachable", () => {
   };
 
   it("should check that all links return a 2xx status code", () => {
-    cy.fixture("homePage.json").then((data) => {
+    cy.fixture("test.json").then((data) => {
       data.forEach((page) => {
         checkArticleLinks(`${page}/content/by/volume/`);
       });

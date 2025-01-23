@@ -1,101 +1,30 @@
 {
-    "articles": [
-      {
-        "title": "Connections in Global Health",
-        "url": "https://connectionscgg-stage-next.bmj.com/content/1/1/e000002"
-      },
-      {
-        "title": "Informatics",
-        "url": "https://informatics-stage-next.bmj.com/content/31/1/e101101"
-      },
-      {
-        "title": "BMJ Digital Health",
-        "url": "https://bmjdigitalhealth-stage-next.bmj.com/content/1/1/e000004"
-      },
-      {
-        "title": "BMJ Medicine",
-        "url": "https://bmjmedicine-stage-next.bmj.com/content/3/1/e000995"
-      },
-      {
-        "title": "BMJ Oncology",
-        "url": "https://bmjoncology-stage-next.bmj.com/content/3/1/e000640"
-      },
-      {
-        "title": "BMJ Open Quality",
-        "url": "https://bmjopenquality-stage-next.bmj.com/content/13/4/e002968"
-      },
-      {
-        "title": "BMJ Open Respiratory Research",
-        "url": "https://bmjopenrespres-stage-next.bmj.com/content/11/1/e001855"
-      },
-      {
-        "title": "BMJ Open Seminars",
-        "url": "https://bmjopensem-stage-next.bmj.com/content/10/4/e002188"
-      },
-      {
-        "title": "BMJ Ophthalmology",
-        "url": "https://bmjophth-stage-next.bmj.com/content/9/1/e001800"
-      },
-      {
-        "title": "BMJ Paediatrics Open",
-        "url": "https://bmjpaedsopen-stage-next.bmj.com/content/8/1/e003059"
-      },
-      {
-        "title": "BMJ Public Health",
-        "url": "https://bmjpublichealth-stage-next.bmj.com/content/2/2/e001195"
-      },
-      {
-        "title": "BMJ Dermatology Research Center",
-        "url": "https://drc-stage-next.bmj.com/content/12/6/e004400"
-      },
-      {
-        "title": "BMJ eGastroenterology",
-        "url": "https://egastroenterology-stage-next.bmj.com/content/2/4/e100115"
-      },
-      {
-        "title": "FMCH (Family Medicine and Community Health)",
-        "url": "https://fmch-stage-next.bmj.com/content/12/4/e003137"
-      },
-      {
-        "title": "BMJ Geriatric Psychiatry",
-        "url": "https://gpsych-stage-next.bmj.com/content/37/6/e101606"
-      },
-      {
-        "title": "Lupus Research",
-        "url": "https://lupus-stage-next.bmj.com/content/11/2/e001347"
-      },
-      {
-        "title": "Neurology Open",
-        "url": "https://neurologyopen-stage-next.bmj.com/content/6/2/e000819"
-      },
-      {
-        "title": "BMJ Nutrition",
-        "url": "https://nutrition-stage-next.bmj.com/content/early/2024/11/26/bmjnph-2024-000960"
-      },
-      {
-        "title": "Open Heart",
-        "url": "https://openheart-stage-next.bmj.com/content/7/2/e001376"
-      },
-      {
-        "title": "BMJ Surgery Interventions & Health Technologies",
-        "url": "https://sit-stage-next.bmj.com/content/6/1/e000334"
-      },
-      {
-        "title": "Stroke and Vascular Neurology",
-        "url": "https://svn-stage-next.bmj.com/content/early/2024/11/26/svn-2024-003574"
-      },
-      {
-        "title": "Trauma and Acute Care Surgery",
-        "url": "https://tsaco-stage-next.bmj.com/content/9/1/e001487"
-      },
-      {
-        "title": "World Journal of Plastic Surgery",
-        "url": "https://wjps-stage-next.bmj.com/content/7/4/e000908"
-      },
-      {
-        "title": "Global Health Research",
-        "url": "https://gh-stage-next.bmj.com/content/9/11/e015686"
-      }
-    ]
-  }
-  
+  "Url": [
+    "https://connectionscgg.bmj.com/content/1/1/e000002",
+    "https://informatics.bmj.com/content/31/1/e101101",
+    "https://bmjdigitalhealth.bmj.com/content/1/1/e000004",
+    "https://bmjmedicine.bmj.com/content/3/1/e000995",
+    "https://bmjoncology.bmj.com/content/3/1/e000640",
+    "https://bmjopenquality.bmj.com/content/13/4/e002968",
+    "https://bmjopenrespres.bmj.com/content/11/1/e001855",
+    "https://bmjopensem.bmj.com/content/10/4/e002188",
+    "https://bmjophth.bmj.com/content/9/1/e001800",
+    "https://bmjpaedsopen.bmj.com/content/8/1/e003059",
+    "https://bmjpublichealth.bmj.com/content/2/2/e001195",
+    "https://drc.bmj.com/content/12/6/e004400",
+    "https://egastroenterology.bmj.com/content/2/4/e100115",
+    "https://fmch.bmj.com/content/12/4/e003137",
+    "https://gpsych.bmj.com/content/37/6/e101606",
+    "https://lupus.bmj.com/content/11/2/e001347",
+    "https://neurologyopen.bmj.com/content/6/2/e000819",
+    "https://nutrition.bmj.com/content/early/2024/11/26/bmjnph-2024-000960",
+    "https://nutrition.bmj.com/content/6/1/108",
+    "https://openheart.bmj.com/content/7/2/e001376",
+    "https://sit.bmj.com/content/6/1/e000334",
+    "https://svn.bmj.com/content/early/2024/11/26/svn-2024-003574",
+    "https://svn.bmj.com/content/9/6/595",
+    "https://tsaco.bmj.com/content/9/1/e001487",
+    "https://wjps.bmj.com/content/7/4/e000908",
+    "https://gh.bmj.com/content/9/11/e015686"
+  ]
+}
