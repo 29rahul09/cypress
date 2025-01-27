@@ -3,6 +3,9 @@ coverage
 build
 node_modules
 stats.json
+cypress/screenshots
+cypress/videos
+cypress/fixtures
 
 # Cruft
 .DS_Store
