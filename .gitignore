@@ -12,3 +12,6 @@ npm-debug.log
 server/newrelic.js
 server/middlewares/generated.serverEntry.js
 
+# Ignore the fixture directory
+cypress/fixtures
+
