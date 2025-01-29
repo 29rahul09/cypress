@@ -1,5 +1,4 @@
-const issuePages = [ 
-  "https://lupus.bmj.com/content/4/Suppl_1",];
+const issuePages = ["https://lupus.bmj.com/content/4/Suppl_1"];
 const journal = "lupus";
 const domain = "https://lupus.bmj.com";
 const articleUrlId = `cypress/fixtures/${journal}.json`;
@@ -33,7 +32,10 @@ describe("Pagination Test", () => {
     cy.get("body").then(($body) => {
       if ($body.find("#search-summary-wrapper").length > 0) {
         cy.get("#search-summary-wrapper").then(($searchSummary) => {
-          if ($searchSummary.is(":visible") && $searchSummary.text().includes("No Results")) {
+          if (
+            $searchSummary.is(":visible") &&
+            $searchSummary.text().includes("No Results")
+          ) {
             cy.wait(500);
             cy.reload().then(() => {
               getOnPageArticles();

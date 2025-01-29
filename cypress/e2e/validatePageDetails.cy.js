@@ -2,7 +2,6 @@
 
 import { runFromLastTestedUrl } from "../functions/getLastTestedUrl";
 
-
 const journal = "RMD";
 const stageSite = "https://rmdopen-stage-next.bmj.com";
 

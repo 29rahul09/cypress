@@ -55,59 +55,5 @@ describe("Testing-links-with-cypress", () => {
           // cy.get('selector').should('be.visible').and('have.text', text)
         });
       });
-
-    // var links = [];
-    // cy.get("a")
-    //   .each(($ele) => {
-    //     links.push($ele.attr("href"));
-    //   })
-    //   .then(() => {
-    //     links.forEach((link) => {
-    //       cy.request(link, { failOnStatusCode: false }).then((response) => {
-    //         expect(response.status).to.eq(200);
-    //       });
-    //     });
-    //   });
-
-
-    // cy.get("a").each(($a) => {
-    //   const message = $a.text();
-    //   expect($a, message).to.have.attr("href").not.contain("undefined");
-    // });
-
-    // cy.get("a").each((a) => {
-    //   cy.get(a).then((page) => {
-    //     let link = page.prop("href");
-    //     cy.request({ url: link, failOnStatusCode: false }).then((response) => {
-    //       cy.log("name:" + link, response.status);
-    //       // if (response.statusCode !== 200) {
-    //       //   // do what you want with bad link
-    //       // }
-    //     });
-    //   });
-    // });
-
-    //     cy.get(".HomeCarouselStyles__topHeader-bcUNXV")
-    //   .each(($el,index,$list) => {
-    //     const href = $el.find('a').attr('href')
-    //     cy.log(href.length)
-    // for(var i=0;i<href.length;i++){
-    //     cy.visit(`https://www.doubtnut.com${href[i]}`);
-    // }
-    //})
-
-    // .each(($el, index, $list) => {
-    //   cy.wrap($el)
-    //     .find("a")
-    //     .invoke("attr", "href")
-    //     .then((href) => {
-    //          cy.request(href)
-    //   .its('status')
-    //   .should('eq', 200)
-    //     });
-    // });
-
-    // cy.contains('div', 'Item 2').next().find('a').click()
   });
-  //
 });

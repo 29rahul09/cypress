@@ -1,6 +1,6 @@
 // npx cypress run --headless --browser chrome --spec "cypress/e2e/metaTagCheck.cy.js"
 describe("Check for noindex Meta Tag", () => {
-  const journal = "articlePage";
+  const journal = "sit";
   it("Extracts loc elements from XML sitemap and writes to JSON file", () => {
     const url = `https://${journal}.bmj.com/pages/sitemap.xml`;
 
@@ -28,13 +28,13 @@ describe("Check for noindex Meta Tag", () => {
     });
   });
 
-  it.only("should find all meta tags and then find the noindex tag within them", () => {
+  it("should find all meta tags and then find the noindex tag within them", () => {
     const metadata = [];
-    cy.fixture("response.json").then((data) => {
+    cy.fixture("sitemap.json").then((data) => {
       data.Url.forEach((url) => {
         // Visit the page you want to test
-        // const pageUrl = url.replace(`${journal}`, `${journal}-stage-next`);
-        const pageUrl = url
+        const pageUrl = url.replace(`${journal}`, `${journal}-stage-next`);
+        // const pageUrl = url
         cy.visit({
           url: `${pageUrl}`,
           failOnStatusCode: false,

@@ -29,7 +29,7 @@ describe("Page Regression Test", () => {
   };
 
   const getPageHrefLinks = () => {
-    const brokenLinks = [{ page: "URL", href:"LINK", status: "STATUS" }];
+    const brokenLinks = [{ page: "URL", href: "LINK", status: "STATUS" }];
     cy.fixture("sitemap.json").then((sitemap) => {
       sitemap.Url.forEach((page) => {
         cy.visit(page, { failOnStatusCode: false });
@@ -41,12 +41,21 @@ describe("Page Regression Test", () => {
                 if (response.status >= 200 && response.status < 400) {
                   console.log(`${response.status}`);
                 } else {
-                  brokenLinks.push({ page: page, href: href, status: response.status });
+                  brokenLinks.push({
+                    page: page,
+                    href: href,
+                    status: response.status,
+                  });
                 }
               })
               .then(() => {
                 if (brokenLinks.length > 0) {
-                  const csvContent = brokenLinks.map((result) => `${result.page},${result.href},${result.status}`).join("\n");
+                  const csvContent = brokenLinks
+                    .map(
+                      (result) =>
+                        `${result.page},${result.href},${result.status}`
+                    )
+                    .join("\n");
                   cy.writeFile(
                     `cypress/downloads/Regression/brokenLinks.csv`,
                     csvContent
@@ -66,13 +75,9 @@ describe("Page Regression Test", () => {
         cy.visit(pageUrl, { failOnStatusCode: false });
         cy.get("footer").scrollIntoView({ duration: 2000 });
         cy.wait(5000);
-
- 
       });
     });
   };
-
-  
 
   it("Extracts Pages from XML Sitemap And Perform Rgression Test", () => {
     getSitemapPages();

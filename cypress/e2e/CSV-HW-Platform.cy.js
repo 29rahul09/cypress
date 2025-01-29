@@ -102,14 +102,27 @@ describe(
     };
 
     const processUrls = (url) => {
-      const externalLinks = [{ url: "URL", videoInAbstract: "VIDEO", tableInAbstract: "TABLE", figureInAbstract: "FIGURE", CTLinks: "CTLINKS", keyMessageBox: "KEYMESSAGEBOX", bodyTextBox: "BODYTEXTBOX", figNTabWithRef: "FIGNTABWITHREF" }];
+      const externalLinks = [
+        {
+          url: "URL",
+          videoInAbstract: "VIDEO",
+          tableInAbstract: "TABLE",
+          figureInAbstract: "FIGURE",
+          CTLinks: "CTLINKS",
+          keyMessageBox: "KEYMESSAGEBOX",
+          bodyTextBox: "BODYTEXTBOX",
+          figNTabWithRef: "FIGNTABWITHREF",
+        },
+      ];
       cy.get("body")
         .then(($body) => {
           const result = {
             url,
             videoInAbstract: $body.find("#brightcove-video").length > 0,
-            tableInAbstract: $body.find("#abstract-1 > .subsection > #T1").length > 0,
-            figureInAbstract: $body.find("#abstract-1> .subsection > #F1").length > 0,
+            tableInAbstract:
+              $body.find("#abstract-1 > .subsection > #T1").length > 0,
+            figureInAbstract:
+              $body.find("#abstract-1> .subsection > #F1").length > 0,
             CTLinks: $body.find('*[class^="external-ref"]').length > 0,
             keyMessageBox: $body.find("#boxed-text-1, .boxed-text").length > 0,
             bodyTextBox: $body.find("#boxed-text-2").length > 0,
@@ -122,9 +135,12 @@ describe(
         })
         .then(() => {
           if (externalLinks.length > 0) {
-            const csvContent = externalLinks.map(link => 
-              `${link.url},${link.videoInAbstract},${link.tableInAbstract},${link.figureInAbstract},${link.CTLinks},${link.keyMessageBox},${link.bodyTextBox},${link.figNTabWithRef}`
-            ).join("\n");
+            const csvContent = externalLinks
+              .map(
+                (link) =>
+                  `${link.url},${link.videoInAbstract},${link.tableInAbstract},${link.figureInAbstract},${link.CTLinks},${link.keyMessageBox},${link.bodyTextBox},${link.figNTabWithRef}`
+              )
+              .join("\n");
             writeUniqueEntriesToFile(
               `cypress/downloads/${journal}/HW/externalLinks.csv`,
               csvContent.split("\n")

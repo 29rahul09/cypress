@@ -1,6 +1,6 @@
 describe("Assertions Demo", () => {
   it("Implicit Assertions Demo", () => {
-    cy.visit("https://www.doubtnut.com/")
+    cy.visit("https://www.doubtnut.com/");
     cy.get(".HomeCarouselStyles__topHeader-bcUNXV")
       .find("a")
       .eq(1)

@@ -50,7 +50,7 @@ describe("Article Page Headings Sections Details", () => {
         if ($body.find('*[class^="external-ref"]').length > 0) {
           links.push(`${domain}${page}`);
         }
-      }); 
+      });
     });
     cy.writeFile(ctLinks, links);
   });

@@ -1,7 +1,4 @@
-const issueAandVol = [
-  "https://neurologyopen.bmj.com/content/4/Suppl_1",
- 
-];
+const issueAandVol = ["https://neurologyopen.bmj.com/content/4/Suppl_1"];
 const journal = "neurologyopen";
 const domain = "https://neurologyopen.bmj.com";
 const articleUrlId = `cypress/fixtures/${journal}.json`;
@@ -46,7 +43,4 @@ describe("Search and Find PDF Only Article Page ", () => {
       cy.writeFile(pdfImageId, pdfImage);
     });
   });
-
-
-  
 });

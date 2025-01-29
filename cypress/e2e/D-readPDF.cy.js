@@ -4,7 +4,9 @@ describe("empty spec", () => {
 
     // cy.contains("simple.pdf").click();
 
-    cy.task('readPdf', "cypress/downloads/simple.pdf")
-    .should('contain', 'Sumit Mehta')
+    cy.task("readPdf", "cypress/downloads/simple.pdf").should(
+      "contain",
+      "Sumit Mehta"
+    );
   });
 });

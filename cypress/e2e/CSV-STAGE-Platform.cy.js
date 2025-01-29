@@ -75,7 +75,7 @@ describe("Investigate Article Page on Stage-site", () => {
       urls.forEach((url) => {
         const link = `${domain}${url}`;
         cy.visit({ url: link, failOnStatusCode: false });
-        
+
         cy.get("main")
           .find("img")
           .each(($img, i) => {
@@ -128,7 +128,7 @@ describe("Investigate Article Page on Stage-site", () => {
             const table = $body.find("#xref-table-wrap-1-1");
             if (tableContent.length === 0 && table.length > 0) {
               brokenTable.push(`${url}`);
-            }else{
+            } else {
               nonBrokenTable.push(`${url}`);
             }
           })

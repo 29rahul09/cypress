@@ -156,5 +156,4 @@ describe("global health journals Homepage", () => {
         // }
       });
   });
-
 });

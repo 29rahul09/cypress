@@ -18,8 +18,8 @@ const journals = [
   "/content/37/2/e101233",
   "/content/37/2/e101262",
   "/content/37/2/e101477",
-  "/content/37/2/e101332"
-]
+  "/content/37/2/e101332",
+];
 describe("Article Page Index", () => {
   it.only("Contains correct Heading", () => {
     journals.forEach((journal) => {
@@ -55,7 +55,7 @@ describe("Article Page Index", () => {
         if ($body.find('*[class^="external-ref"]').length > 0) {
           links.push(`${domain}${page}`);
         }
-      }); 
+      });
     });
     cy.writeFile(ctLinks, links);
   });

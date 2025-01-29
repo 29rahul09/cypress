@@ -12,13 +12,13 @@ describe("Check all links are reachable", () => {
           .find("a")
           .first()
           .click();
-          checkLinks(page, ".issue-toc");
+        checkLinks(page, ".issue-toc");
       } else {
         cy.get('[data-testid="article-list-section-0"]')
           .find("a")
           .first()
           .click();
-          checkLinks(page, ".prose");
+        checkLinks(page, ".prose");
       }
     });
   };
@@ -28,7 +28,7 @@ describe("Check all links are reachable", () => {
       const href = $link.prop("href"); // Get the href attribute of the link
 
       // Ensure the href is not empty or a javascript link
-      if (href ) {
+      if (href) {
         // Use cy.request to check if the link is valid
         cy.visit({
           url: href,

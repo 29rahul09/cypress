@@ -33,7 +33,8 @@ describe("Check all links are reachable", () => {
                 .join("\n");
               cy.writeFile(
                 `cypress/downloads/Daily/brokenLinks.csv`,
-                csvContent + "\n",   { flag: "a+" }
+                csvContent + "\n",
+                { flag: "a+" }
               );
               // Clear the brokenLinks array after writing to the file
               brokenLinks.length = 0; // Clear array to prevent memory overload

@@ -55,8 +55,10 @@ describe(
           const result = {
             url,
             videoInAbstract: $body.find("#brightcove-video").length > 0,
-            tableInAbstract: $body.find("#abstract-1 > .subsection > #T1").length > 0,
-            figureInAbstract: $body.find("#abstract-1> .subsection > #F1").length > 0,
+            tableInAbstract:
+              $body.find("#abstract-1 > .subsection > #T1").length > 0,
+            figureInAbstract:
+              $body.find("#abstract-1> .subsection > #F1").length > 0,
             CTLinks: $body.find('*[class^="external-ref"]').length > 0,
             keyMessageBox: $body.find("#boxed-text-1, .boxed-text").length > 0,
             bodyTextBox: $body.find("#boxed-text-2").length > 0,
@@ -187,14 +189,9 @@ describe("Check all links are reachable", () => {
   const writeBrokenLinksToFile = () => {
     if (brokenLinks.length > 0) {
       const csvContent = brokenLinks
-            .map(
-          (result) => `${result.href}`
-            )
-            .join("\n");
-          cy.writeFile(
-            `cypress/downloads/Daily_404/brokenLinks.csv`,
-            csvContent
-          );
+        .map((result) => `${result.href}`)
+        .join("\n");
+      cy.writeFile(`cypress/downloads/Daily_404/brokenLinks.csv`, csvContent);
 
       // Clear the brokenLinks array after writing to the file
       brokenLinks.length = 0; // Clear array to prevent memory overload

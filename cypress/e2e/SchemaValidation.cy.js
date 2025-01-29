@@ -26,10 +26,10 @@ describe("Check JSON-LD Schema", () => {
 
           // Check the article section
           expect(schema["articleSection"]).to.be.not.empty;
-        //   expect(schema["articleSection"]).to.be.an("object").that.is.not.empty;
-        //   expect(schema["articleSection"])
-        //     .to.have.property("articleSeriesTitle")
-        //     .that.is.a("string").that.is.not.empty;
+          //   expect(schema["articleSection"]).to.be.an("object").that.is.not.empty;
+          //   expect(schema["articleSection"])
+          //     .to.have.property("articleSeriesTitle")
+          //     .that.is.a("string").that.is.not.empty;
           // expect(schema['articleSection']).to.have.property('articleHeading').that.is.a('string').that.is.not.empty;
 
           // Validate author details (can loop over the authors to check)
@@ -48,7 +48,7 @@ describe("Check JSON-LD Schema", () => {
           expect(datePublished.toString()).to.not.equal("Invalid Date");
 
           // Check the URL is correct
-        //   expect(schema["url"]).to.equal(`${url}`);
+          //   expect(schema["url"]).to.equal(`${url}`);
         });
       });
     });

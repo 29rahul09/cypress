@@ -2,7 +2,7 @@ describe("Global Health Journals WebPage", () => {
   beforeEach("Visit global health homepage", () => {
     cy.visit("https://gh.bmj.com/");
   });
-  
+
   it("Header Links Response Check", () => {
     cy.get('[data-testid="top-menu-container"]')
       .find("a")
