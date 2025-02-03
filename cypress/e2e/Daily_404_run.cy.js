@@ -2,6 +2,9 @@
 describe("Check all links are reachable", () => {
   const brokenLinks = [];
   const batchSize = 1; // Define the batch size for incremental writes
+  const processedPagesFile = "cypress/downloads/Daily/processedPages.json";
+  const outputCsvFile = "cypress/downloads/Daily/brokenLinks.csv";
+
   const checkArticleLinks = (page) => {
     cy.visit(page); // Visit the page
     // Find all anchor tags on the page
@@ -31,12 +34,7 @@ describe("Check all links are reachable", () => {
               const csvContent = brokenLinks
                 .map((result) => `${result.href}`)
                 .join("\n");
-              cy.writeFile(
-                `cypress/downloads/Daily/brokenLinks.csv`,
-                csvContent + "\n",
-                { flag: "a+" }
-              );
-              // Clear the brokenLinks array after writing to the file
+              cy.writeFile(outputCsvFile, csvContent + "\n", { flag: "a+" });
               brokenLinks.length = 0; // Clear array to prevent memory overload
             }
           });
@@ -44,11 +42,44 @@ describe("Check all links are reachable", () => {
     });
   };
 
+  const getProcessedPages = () => {
+    // Check if the processedPages.json file exists using the custom task
+    cy.task('fileExists', processedPagesFile).then((exists) => {
+      if (!exists) {
+        // If the file doesn't exist, create it with an empty array
+        return cy.task('writeFile', { filePath: processedPagesFile, content: [] });
+      }
+    });
+
+    // Now that we know the file exists (or was created), read its content
+    return cy.task('readFile', { filePath: processedPagesFile });
+  };
+
+  const markPageAsProcessed = (page) => {
+    getProcessedPages().then((processedPages) => {
+      processedPages.push(page);
+      cy.task('writeFile', { filePath: processedPagesFile, content: processedPages });
+    });
+  };
+
   it("should check that all links return a 2xx status code", () => {
     cy.fixture("homePage.json").then((data) => {
-      data.forEach((page) => {
-        checkArticleLinks(page);
-        checkArticleLinks(`${page}/content/current`);
+      getProcessedPages().then((processedPages) => {
+        // If processedPages is empty or doesn't exist, start from the first page
+        const unprocessedPages = data.filter((page) => !processedPages.includes(page));
+
+        // If there are no unprocessed pages, finish the test
+        if (unprocessedPages.length === 0) {
+          cy.log("All pages have already been processed.");
+          return;
+        }
+
+        // Process each unprocessed page
+        unprocessedPages.forEach((page) => {
+          // checkArticleLinks(page);
+          checkArticleLinks(`${page}/content/current`);
+          markPageAsProcessed(page);
+        });
       });
     });
   });

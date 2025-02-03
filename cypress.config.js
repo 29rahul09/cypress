@@ -48,7 +48,14 @@ module.exports = defineConfig({
       on("task", { readPdf, downloadFile,csvToJson });
       on('task', {
         fileExists(filePath) {
-          return fs.existsSync(filePath);
+          return fs.existsSync(filePath); // Check if file exists
+        },
+        writeFile({ filePath, content }) {
+          fs.writeFileSync(filePath, JSON.stringify(content)); // Write content to file
+          return null;
+        },
+        readFile({ filePath }) {
+          return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath)) : []; // Read file content or return empty array
         }
       });
     },
