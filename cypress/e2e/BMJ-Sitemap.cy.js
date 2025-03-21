@@ -1,11 +1,8 @@
 /// <reference types="cypress" />
-
+// npx cypress run --headless --browser chrome --spec "cypress/e2e/BMJ-Sitemap.cy.js"
 describe("Sitemap Parsing", () => {
-  it("Extracts loc elements from XML sitemap and writes to JSON file", () => {
-    // npx cypress run --headless --browser chrome --spec "cypress/e2e/BMJ-Sitemap.cy.js"
-    const url = "https://rmdopen.bmj.com/pages/sitemap.xml";
-
-    // Fetch the XML sitemap
+  const fetchSitemapPages = (url) => {
+    const journal = url.split("/")[2].split(".")[0];
     cy.request(url).then((response) => {
       // Parse the XML content
       const parser = new DOMParser();
@@ -19,13 +16,43 @@ describe("Sitemap Parsing", () => {
         (locElement) => locElement.textContent
       );
 
-      // Define the JSON object to be written
-      const pageUrl = {
-        Url: locArray,
-      };
+      // Filter URLs that contain '/content', '/collections', or '/pages'
+      const contentUrls = locArray.filter((url) => url.includes("/content"));
+      const collectionsUrls = locArray.filter((url) =>
+        url.includes("/collections")
+      );
+      const pagesUrls = locArray.filter((url) => url.includes("/pages"));
 
-      // Write the JSON output to a file
-      cy.writeFile("cypress/fixtures/sitemap.json", pageUrl);
+      // Define the JSON object to be written for each category
+      const contentPageUrl = { Url: contentUrls };
+      const collectionsPageUrl = { Url: collectionsUrls };
+      const pagesPageUrl = { Url: pagesUrls };
+
+      // Write the filtered URLs to separate JSON files
+      cy.writeFile(
+        `cypress/downloads/sitemaps/${journal}/sitemapContent.json`,
+        contentPageUrl
+      );
+      cy.writeFile(
+        `cypress/downloads/sitemaps/${journal}/sitemapCollections.json`,
+        collectionsPageUrl
+      );
+      cy.writeFile(
+        `cypress/downloads/sitemaps/${journal}/sitemap.json`,
+        pagesPageUrl
+      );
     });
+  };
+  it.only("Extracts loc elements from XML sitemap and writes to separate JSON files based on URL patterns", () => {
+    cy.fixture("sitemap.json").then((data) => {
+      data.Url.forEach((url) => {
+        fetchSitemapPages(url);
+      });
+    });
+  });
+  it("Writes loc elements in sitemaps to separate JSON files based on URL patterns", () => {
+    // Fetch the XML sitemap and write to JSON files
+    const url = "https://sit.bmj.com/pages/sitemap.xml";
+    fetchSitemapPages(url);
   });
 });

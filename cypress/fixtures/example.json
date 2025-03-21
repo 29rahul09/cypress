@@ -1,5 +1,29 @@
-{
-  "name": "Rahul",
-  "email": "Rahul@cypress.io",
-  "city": "Bareilly"
-}
+[
+  "https://bmjdigitalhealth.bmj.com",
+  "https://bmjmedicine.bmj.com",
+  "https://bmjophth.bmj.com",
+  "https://bmjopenrespres.bmj.com",
+  "https://bmjopensem.bmj.com",
+  "https://bmjopenquality.bmj.com",
+  "https://bmjoncology.bmj.com",
+  "https://bmjpublichealth.bmj.com",
+  "https://bmjpaedsopen.bmj.com",
+  "http://connectionscgg.bmj.com",
+  "https://connectionsoncology.bmj.com",
+  "https://drc.bmj.com",
+  "https://egastroenterology.bmj.com",
+  "https://fmch.bmj.com",
+  "https://gh.bmj.com",
+  "https://gocm.bmj.com",
+  "https://gpsych.bmj.com",
+  "http://informatics.bmj.com",
+  "https://lupus.bmj.com",
+  "https://mentalhealth.bmj.com",
+  "https://neurologyopen.bmj.com",
+  "https://nutrition.bmj.com",
+  "https://openheart.bmj.com",
+  "https://sit.bmj.com",
+  "https://svn.bmj.com",
+  "https://tsaco.bmj.com",
+  "https://wjps.bmj.com"
+]

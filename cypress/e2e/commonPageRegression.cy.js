@@ -5,26 +5,11 @@ describe(
   "Page Regression Test",
   {
     viewportHeight: 800,
-    viewportWidth: 1200,
+    viewportWidth: 1280,
   },
   () => {
-    const journal = "https://connectionsoncology.bmj.com";
+    const journal = "https://migrated.bmj.com";
     const domain = journal.split("/")[2].split(".")[0];
-
-    // Fetch sitemap and write to file
-    const getSitemapPages = () => {
-      const sitemap = `${journal}/pages/sitemap.xml`;
-      cy.request(sitemap).then((response) => {
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(response.body, "application/xml");
-        const locElements = xmlDoc.getElementsByTagName("loc");
-        const locArray = Array.from(locElements).map(
-          (locElement) => locElement.textContent
-        );
-        const pageUrl = { Url: locArray };
-        cy.writeFile("cypress/fixtures/sitemap.json", pageUrl);
-      });
-    };
 
     // Helper function to write broken links to a CSV file
     const writeBrokenLinkToCSV = (fileName, page, href, status) => {
@@ -77,22 +62,29 @@ describe(
 
     // Test case: Perform Regression Test on Pages Common in All Journals
     it("Perform Regression Test on Pages Common in All Journals", () => {
-      getSitemapPages();
-      cy.fixture("sitemap.json").then((data) => {
+      cy.fixture("commonPages.json").then((data) => {
         data.Url.forEach((page) => {
-          cy.visit(`${page}`, { failOnStatusCode: false }).then(() => {
-            checkSectionLinks("main", `${page}`, "brokenLinks.csv");
-          });
+          cy.visit(`${journal}${page}`, { failOnStatusCode: false }).then(
+            () => {
+              checkSectionLinks("main", `${journal}${page}`, "brokenLinks.csv");
+            }
+          );
         });
       });
     });
 
-    // Test case: Perform Regression Test on Pages Common in All Journals
-    it.skip("Perform Regression Test on Pages Common in All Journals", () => {
-      cy.fixture("sitemap.json").then((data) => {
-        data.Url.forEach((page) => {
+    // Test case: Perform Regression Test on Homepage of All Journals
+    it.only("Perform Regression Test on Pages Common in All Journals", () => {
+      cy.fixture("homePage.json").then((data) => {
+        data.forEach((page) => {
           cy.visit(`${page}`, { failOnStatusCode: false }).then(() => {
+            checkSectionLinks(
+              '[data-testid="top-menu-container"]',
+              `${page}`,
+              "navBarLinks.csv"
+            );
             checkSectionLinks("main", `${page}`, "brokenLinks.csv");
+            checkSectionLinks("footer", `${page}`, "footerLinks.csv");
           });
         });
       });

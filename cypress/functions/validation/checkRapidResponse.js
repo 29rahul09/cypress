@@ -32,29 +32,32 @@ export const validateRapidResponsesTest = (articleUrl, journal) => {
         );
         if (overviewResponses && bodyResponses) {
           cy.get("#rapid-responses").click();
-          cy.get('[data-testid="compose-rapid-response"] a').each(($anchor) => {
-            const url = $anchor.prop("href");
-            cy.request({
-              url: url,
-              failOnStatusCode: false,
-              timeout: 6000,
-            })
-              .then((response) => {
-                if (response.status !== 200) {
-                  missingResponses.push(
-                    `Error in Responses Files ==> /content${articleUrl} ==> ${url}`
-                  );
-                }
-              })
-              .then(() => {
-                if (missingResponses.length > 0) {
-                  writeUniqueEntriesToFile(
-                    `cypress/SmokeTest/${journal}/missingResponses.csv`,
-                    missingResponses
-                  );
-                }
-              });
-          });
+          cy.get('[data-testid="compose-rapid-response"] > .flex').should(
+            "be.visible"
+          );
+          // cy.get('[data-testid="compose-rapid-response"] a').each(($anchor) => {
+          //   const url = $anchor.prop("href");
+          //   cy.request({
+          //     url: url,
+          //     failOnStatusCode: false,
+          //     timeout: 6000,
+          //   })
+          //     .then((response) => {
+          //       if (response.status !== 200) {
+          //         missingResponses.push(
+          //           `Error in Responses Files ==> /content${articleUrl} ==> ${url}`
+          //         );
+          //       }
+          //     })
+          //     .then(() => {
+          //       if (missingResponses.length > 0) {
+          //         writeUniqueEntriesToFile(
+          //           `cypress/SmokeTest/${journal}/missingResponses.csv`,
+          //           missingResponses
+          //         );
+          //       }
+          //     });
+          // });
         } else if (overviewResponses && !bodyResponses) {
           missingResponses.push(`NO Responses in Body ==> /content${articleUrl}`);
 

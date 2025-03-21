@@ -59,7 +59,7 @@ describe("Check all links are reachable", () => {
   };
 
   it("should check that all links return a 2xx status code", () => {
-    cy.fixture("test.json").then((data) => {
+    cy.fixture("homePage.json").then((data) => {
       data.forEach((page) => {
         checkArticleLinks(`${page}/content/by/volume/`);
       });

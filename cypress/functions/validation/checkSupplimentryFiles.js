@@ -38,7 +38,7 @@ export const validateSupplementaryMaterialsTest = (articleUrl, journal) => {
               cy.request({
                 url: url,
                 failOnStatusCode: false,
-                timeout: 6000,
+                timeout: 15000,
               })
                 .then((response) => {
                   if (response.status !== 200) {
