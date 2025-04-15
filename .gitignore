@@ -6,6 +6,9 @@ stats.json
 cypress/screenshots
 cypress/videos
 cypress/fixtures
+mydownloads
+reports
+output.json
 
 # Cruft
 .DS_Store

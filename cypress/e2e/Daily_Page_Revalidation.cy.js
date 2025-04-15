@@ -1,3 +1,4 @@
+// npx cypress run --headless --spec "cypress/e2e/Daily_Page_Revalidation.cy.js"
 describe("Re Validate all article links with 404 Error", () => {
   const filePath = `cypress/downloads/Daily/brokenLinks.json`;
   const outputFilePath = `cypress/downloads/Daily/revalidationResults.json`; // Path for the output file

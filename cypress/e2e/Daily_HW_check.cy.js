@@ -1,4 +1,4 @@
-// npx cypress run --headless --browser chrome --spec "cypress/e2e/Daily_404_run.cy.js"
+// npx cypress run --headless --browser chrome --spec "cypress/e2e/Daily_HW_checks.cy.js"
 describe("Check all links are reachable", () => {
   const highWireLinks = [];
   const batchSize = 1; // Define the batch size for incremental writes

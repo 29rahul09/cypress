@@ -1,13 +1,15 @@
 // npx cypress run --headless --spec "cypress/e2e/Daily_404_run.cy.js"
 describe("Check all links are reachable", () => {
   const processedPagesFile = "cypress/downloads/Daily/processedPages.json";
-  const outputCsvFile = "cypress/downloads/Daily/brokenLinks.json";
+  const outputCsvFile = "cypress/downloads/Daily/missingOverview.json";
 
   // Function to visit and check for broken links on a page
   const checkArticleLinks = (page) => {
     cy.visit(page);
     cy.url().then((pageUrl) => {
-      let currentUrl = pageUrl.includes("content") ? pageUrl.replace("content", "/content") : pageUrl;
+      let currentUrl = pageUrl.includes("content")
+        ? pageUrl.replace("content", "/content")
+        : pageUrl;
       cy.visit(currentUrl);
       cy.get(".issue-toc a").each(($link) => checkLink($link));
     });
@@ -19,7 +21,12 @@ describe("Check all links are reachable", () => {
     if (href && href.match(/\/content\/\d+/)) {
       cy.request({ url: href, failOnStatusCode: false }).then((response) => {
         if (response.status < 200 || response.status >= 400) {
-          writeBrokenLinkToFile(href);
+          writeBrokenLinkToFile(`${href} - ${response.status}`);
+        } else {
+          // Check if the overview exists in the response body
+          if (!response.body.includes('data-testid="overview"')) {
+            writeBrokenLinkToFile(href);
+          }
         }
       });
     }
@@ -33,7 +40,9 @@ describe("Check all links are reachable", () => {
       }
 
       cy.readFile(outputCsvFile).then((existingData) => {
-        const updatedData = existingData?.Url ? { Url: [...existingData.Url, brokenLink] } : { Url: [brokenLink] };
+        const updatedData = existingData?.Url
+          ? { Url: [...existingData.Url, brokenLink] }
+          : { Url: [brokenLink] };
         cy.writeFile(outputCsvFile, JSON.stringify(updatedData, null, 2));
       });
     });
@@ -68,7 +77,10 @@ describe("Check all links are reachable", () => {
   const markPageAsProcessed = (page) => {
     getProcessedPages().then((processedPages) => {
       processedPages.push(page);
-      cy.task("writeFile", { filePath: processedPagesFile, content: processedPages });
+      cy.task("writeFile", {
+        filePath: processedPagesFile,
+        content: processedPages,
+      });
     });
   };
 
@@ -79,7 +91,9 @@ describe("Check all links are reachable", () => {
         processedPages = processedPages || [];
 
         // Get unprocessed pages by filtering out the processed ones
-        const unprocessedPages = data.filter((page) => !processedPages.includes(page));
+        const unprocessedPages = data.filter(
+          (page) => !processedPages.includes(page)
+        );
 
         // If there are no unprocessed pages, finish the test
         if (unprocessedPages.length === 0) {

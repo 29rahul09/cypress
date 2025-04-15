@@ -3,7 +3,13 @@
 describe("Sitemap Parsing", () => {
   const fetchSitemapPages = (url) => {
     const journal = url.split("/")[2].split(".")[0];
-    cy.request(url).then((response) => {
+    cy.request({
+      url: url,
+      auth: {
+        username: "BMJStaging",
+        password: "bmj2410",
+      },
+    }).then((response) => {
       // Parse the XML content
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(response.body, "application/xml");
@@ -52,7 +58,7 @@ describe("Sitemap Parsing", () => {
   });
   it("Writes loc elements in sitemaps to separate JSON files based on URL patterns", () => {
     // Fetch the XML sitemap and write to JSON files
-    const url = "https://sit.bmj.com/pages/sitemap.xml";
+    const url = "https://jmepb-stage-next.bmj.com/pages/sitemap.xml";
     fetchSitemapPages(url);
   });
 });
