@@ -9,6 +9,8 @@ cypress/fixtures
 mydownloads
 reports
 output.json
+preview.json
+artifacts/
 
 # Cruft
 .DS_Store

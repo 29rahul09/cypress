@@ -3,7 +3,7 @@ const path = require('path');
 
 // Path to your folder with JSON files
 const folderPath = path.join(__dirname, 'mydownloads/preview-url/'); // <-- Replace with your folder name
-const outputFilePath = path.join(__dirname, 'output.json');
+const outputFilePath = path.join(__dirname, 'preview.json');
 
 const result = {};
 

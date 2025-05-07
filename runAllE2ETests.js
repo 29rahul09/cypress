@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
-const inputPath = path.join(__dirname, 'output.json');
+const inputPath = path.join(__dirname, 'preview.json');
 const specPattern = '**/E2E/**.page.cy.ts';
 const skipServe = '--skipServe';
 
